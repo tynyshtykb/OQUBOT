@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>OquBot - Тест микрофона</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #mic-btn {
+            background-color: #4CAF50; /* Зеленый по умолчанию */
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #mic-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        #status-text {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #aaa;
+            text-align: center;
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="mic-btn" onclick="toggleRecord()">🎤 Начать запись</button>
+    <div id="status-text">Нажми на кнопку, чтобы OquBot начал слушать</div>
+
+    <script>
+        let isRecording = false;
+
+        async function toggleRecord() {
+            const btn = document.getElementById('mic-btn');
+            const status = document.getElementById('status-text');
+
+            if (!isRecording) {
+                // Включаем запись
+                isRecording = true;
+                btn.style.backgroundColor = '#f44336'; // Красный
+                btn.innerHTML = '⏹ Остановить запись';
+                status.innerHTML = '🔴 Робот слушает...';
+                
+                // Отправляем сигнал в Python включить микрофон
+                await pywebview.api.start_record();
+            } else {
+                // Останавливаем запись
+                isRecording = false;
+                btn.style.backgroundColor = '#FFC107'; // Желтый (думает)
+                btn.innerHTML = '⏳ Обработка...';
+                btn.disabled = true; // Блокируем кнопку, пока ИИ генерирует ответ
+                status.innerHTML = '🟡 Робот думает и генерирует голос...';
+
+                // Отправляем сигнал остановить микрофон и ждем ответа от ИИ
+                let responseText = await pywebview.api.stop_and_process();
+                
+                // Выводим ответ на экран и возвращаем кнопку в исходное состояние
+                status.innerHTML = '<b>Ответ:</b><br>' + responseText;
+                btn.style.backgroundColor = '#4CAF50'; // Зеленый
+                btn.innerHTML = '🎤 Начать запись';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

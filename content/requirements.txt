@@ -1,0 +1,7 @@
+elevenlabs
+groq
+pyaudio
+pygame
+python-dotenv
+numpy
+dotenv
