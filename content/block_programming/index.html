@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OquBot IDE — Среда блочного программирования</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Blockly CDN -->
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/ru.js"></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================== LOADING SCREEN ======================== -->
+<div id="loading-screen">
+    <div class="loading-logo">OquBot IDE</div>
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Загрузка среды программирования...</div>
+</div>
+
+<!-- ======================== APP CONTAINER ======================== -->
+<div id="app" style="opacity: 0;">
+
+    <!-- ==================== MENU BAR ==================== -->
+    <div id="menu-bar">
+        <div class="menu-brand">
+            <span class="menu-brand-icon">🤖</span>
+            <span class="menu-brand-text">OquBot IDE</span>
+        </div>
+
+        <!-- File Menu -->
+        <div class="menu-item">
+            <button class="menu-item-btn" id="menu-file-btn">Файл</button>
+            <div class="menu-dropdown" id="menu-file-dropdown">
+                <button class="menu-dropdown-item" id="action-new" onclick="OquIDE.newProject()">
+                    📄 Новый проект
+                    <span class="shortcut">Ctrl+N</span>
+                </button>
+                <button class="menu-dropdown-item" id="action-open" onclick="OquIDE.openProject()">
+                    📂 Открыть...
+                    <span class="shortcut">Ctrl+O</span>
+                </button>
+                <div class="menu-dropdown-divider"></div>
+                <button class="menu-dropdown-item" id="action-save" onclick="OquIDE.saveProject()">
+                    💾 Сохранить
+                    <span class="shortcut">Ctrl+S</span>
+                </button>
+                <button class="menu-dropdown-item" id="action-save-as" onclick="OquIDE.saveProjectAs()">
+                    📥 Сохранить как...
+                    <span class="shortcut">Ctrl+Shift+S</span>
+                </button>
+                <div class="menu-dropdown-divider"></div>
+                <button class="menu-dropdown-item" id="action-export" onclick="OquIDE.exportCode()">
+                    📋 Экспорт кода
+                </button>
+            </div>
+        </div>
+
+        <!-- Edit Menu -->
+        <div class="menu-item">
+            <button class="menu-item-btn" id="menu-edit-btn">Правка</button>
+            <div class="menu-dropdown" id="menu-edit-dropdown">
+                <button class="menu-dropdown-item" id="action-undo" onclick="OquIDE.undo()">
+                    ↩️ Отменить
+                    <span class="shortcut">Ctrl+Z</span>
+                </button>
+                <button class="menu-dropdown-item" id="action-redo" onclick="OquIDE.redo()">
+                    ↪️ Повторить
+                    <span class="shortcut">Ctrl+Y</span>
+                </button>
+                <div class="menu-dropdown-divider"></div>
+                <button class="menu-dropdown-item" id="action-clear" onclick="OquIDE.clearWorkspace()">
+                    🗑️ Очистить всё
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Menu -->
+        <div class="menu-item">
+            <button class="menu-item-btn" id="menu-settings-btn" onclick="OquIDE.showSettings()">Настройки</button>
+        </div>
+
+        <!-- Help Menu -->
+        <div class="menu-item">
+            <button class="menu-item-btn" id="menu-help-btn">Помощь</button>
+            <div class="menu-dropdown">
+                <button class="menu-dropdown-item" onclick="OquIDE.showAbout()">
+                    ℹ️ О программе
+                </button>
+                <button class="menu-dropdown-item" onclick="OquIDE.showKeyboardShortcuts()">
+                    ⌨️ Горячие клавиши
+                </button>
+            </div>
+        </div>
+
+        <div class="menu-spacer"></div>
+
+        <!-- Block count -->
+        <div class="menu-status">
+            <span class="block-count" id="block-count">Блоков: 0</span>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN IDE AREA ==================== -->
+    <div id="ide-main">
+        <!-- Blockly Workspace -->
+        <div id="blockly-area">
+            <div id="blockly-div"></div>
+        </div>
+
+        <!-- Resize Handle -->
+        <div id="resize-handle"></div>
+
+        <!-- Code Panel -->
+        <div id="code-panel">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <span class="dot"></span>
+                    Python
+                </div>
+                <div class="panel-header-actions">
+                    <button class="panel-icon-btn" onclick="OquIDE.copyCode()" data-tooltip="Копировать код">📋</button>
+                    <button class="panel-icon-btn" onclick="OquIDE.toggleCodePanel()" data-tooltip="Свернуть">✕</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <pre id="code-output"><span class="code-comment"># Перетащите блоки на рабочую область,\n# чтобы увидеть сгенерированный код</span></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ACTION BAR ==================== -->
+    <div id="action-bar">
+        <button class="action-btn action-btn--primary" id="btn-run" onclick="OquIDE.runProgram()">
+            ▶ Запустить
+        </button>
+        <button class="action-btn action-btn--danger action-btn--disabled" id="btn-stop" onclick="OquIDE.stopProgram()">
+            ⏹ Стоп
+        </button>
+        <button class="action-btn" id="btn-connect" onclick="OquIDE.connectRobot()">
+            🔌 Подключить робота
+        </button>
+
+        <div class="action-spacer"></div>
+
+        <div class="status-badge" id="status-badge">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Не подключён</span>
+        </div>
+    </div>
+
+</div> <!-- end #app -->
+
+<!-- ======================== SETTINGS MODAL ======================== -->
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">⚙️ Настройки</span>
+            <button class="modal-close" onclick="OquIDE.closeModal('settings-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-group">
+                <label class="setting-label">Язык интерфейса</label>
+                <p class="setting-description">Выберите язык для меню, блоков и подсказок</p>
+                <select class="setting-select" id="setting-language" onchange="OquIDE.setLanguage(this.value)">
+                    <option value="ru" selected>🇷🇺 Русский</option>
+                    <option value="kk">🇰🇿 Қазақша</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">Размер шрифта кода</label>
+                <select class="setting-select" id="setting-font-size" onchange="OquIDE.setCodeFontSize(this.value)">
+                    <option value="11">Маленький (11px)</option>
+                    <option value="12" selected>Стандартный (12px)</option>
+                    <option value="14">Большой (14px)</option>
+                    <option value="16">Очень большой (16px)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">Звуки Blockly</label>
+                <select class="setting-select" id="setting-sounds" onchange="OquIDE.setSounds(this.value)">
+                    <option value="on">Включены</option>
+                    <option value="off" selected>Выключены</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== ABOUT MODAL ======================== -->
+<div class="modal-overlay" id="about-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">ℹ️ О программе</span>
+            <button class="modal-close" onclick="OquIDE.closeModal('about-modal')">✕</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 12px;">🤖</div>
+            <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;
+                        background: linear-gradient(135deg, #00d4ff, #9966ff);
+                        -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                OquBot IDE
+            </div>
+            <div style="color: var(--text-muted); margin-bottom: 16px; font-size: 12px;">
+                Версия 1.0.0
+            </div>
+            <div style="color: var(--text-secondary); font-size: 13px; line-height: 1.6;">
+                Среда блочного программирования<br>
+                для робота-аниматроника OquBot.<br><br>
+                Создавай программы из блоков<br>
+                и управляй роботом в реальной жизни!
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== KEYBOARD SHORTCUTS MODAL ======================== -->
+<div class="modal-overlay" id="shortcuts-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">⌨️ Горячие клавиши</span>
+            <button class="modal-close" onclick="OquIDE.closeModal('shortcuts-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-group">
+                <div class="menu-dropdown-item"><span>📄 Новый проект</span><span class="shortcut" style="margin-left:auto">Ctrl+N</span></div>
+                <div class="menu-dropdown-item"><span>📂 Открыть</span><span class="shortcut" style="margin-left:auto">Ctrl+O</span></div>
+                <div class="menu-dropdown-item"><span>💾 Сохранить</span><span class="shortcut" style="margin-left:auto">Ctrl+S</span></div>
+                <div class="menu-dropdown-item"><span>↩️ Отменить</span><span class="shortcut" style="margin-left:auto">Ctrl+Z</span></div>
+                <div class="menu-dropdown-item"><span>↪️ Повторить</span><span class="shortcut" style="margin-left:auto">Ctrl+Y</span></div>
+                <div class="menu-dropdown-item"><span>▶ Запустить</span><span class="shortcut" style="margin-left:auto">F5</span></div>
+                <div class="menu-dropdown-item"><span>⏹ Стоп</span><span class="shortcut" style="margin-left:auto">Shift+F5</span></div>
+                <div class="menu-dropdown-item"><span>🗑️ Удалить блок</span><span class="shortcut" style="margin-left:auto">Delete</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- App Logic -->
+<script src="script.js"></script>
+
+</body>
+</html>
