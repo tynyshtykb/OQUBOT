@@ -82,9 +82,9 @@ class OquBotAPI:
             # Озвучиваем ответ (ElevenLabs)
             self.voice.speak(
                 text=brain_response, 
-                language=self.CURRENT_LANG
+                language=self.CURRENT_LANG,
+                voice = self.voice.voice_id
             )
-            # Возвращаем текст обратно в окно интерфейса
             return brain_response
             
         return "Произошла ошибка при генерации ответа."
