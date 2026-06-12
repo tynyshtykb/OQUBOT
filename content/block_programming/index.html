@@ -33,7 +33,7 @@
     <!-- ==================== MENU BAR ==================== -->
     <div id="menu-bar">
         <div class="menu-brand">
-            <span class="menu-brand-icon">🤖</span>
+            <img src="icon.ico" alt="OquBot Logo" class="menu-brand-icon" style="width:24px; height:24px; margin-right:8px;">
             <span class="menu-brand-text">OquBot IDE</span>
         </div>
 
@@ -87,6 +87,28 @@
         <!-- Settings Menu -->
         <div class="menu-item">
             <button class="menu-item-btn" id="menu-settings-btn" onclick="OquIDE.showSettings()">Настройки</button>
+        </div>
+
+        <!-- Examples Menu -->
+        <div class="menu-item">
+            <button class="menu-item-btn">Примеры</button>
+            <div class="menu-dropdown">
+                <button class="menu-dropdown-item" onclick="OquIDE.loadExample('greeting')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Приветствие
+                </button>
+                <button class="menu-dropdown-item" onclick="OquIDE.loadExample('emotions')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Эмоции
+                </button>
+            </div>
+        </div>
+
+        <!-- Voice Chat Mode (Button) -->
+        <div class="menu-item" style="margin-left: 10px;">
+            <button class="menu-item-btn" style="background: rgba(255,255,255,0.2); border-radius: 6px; padding: 0 12px;" onclick="OquIDE.openModal('voice-modal')">
+                🎙️ Голосовой чат
+            </button>
         </div>
 
         <!-- Help Menu -->
@@ -146,9 +168,6 @@
         <button class="action-btn action-btn--danger action-btn--disabled" id="btn-stop" onclick="OquIDE.stopProgram()">
             ⏹ Стоп
         </button>
-        <button class="action-btn" id="btn-connect" onclick="OquIDE.connectRobot()">
-            🔌 Подключить робота
-        </button>
 
         <div class="action-spacer"></div>
 
@@ -193,6 +212,23 @@
                     <option value="off" selected>Выключены</option>
                 </select>
             </div>
+            
+            <div class="setting-divider"></div>
+            <div class="setting-section-title">🔑 API Ключи (Голосовой режим)</div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Groq API Key (для STT и LLM)</label>
+                <p class="setting-description">Получите бесплатный ключ на console.groq.com</p>
+                <input type="password" class="setting-input" id="setting-groq-key" placeholder="gsk_..." onchange="OquIDE.saveApiKeys()">
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">ElevenLabs API Key (для голоса)</label>
+                <p class="setting-description">Получите ключ на elevenlabs.io</p>
+                <input type="password" class="setting-input" id="setting-elevenlabs-key" placeholder="sk_..." onchange="OquIDE.saveApiKeys()">
+            </div>
+            <div class="setting-group">
+                <button class="action-btn" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="OquIDE.testApiKeys()">Проверить ключи</button>
+            </div>
         </div>
     </div>
 </div>
@@ -205,10 +241,8 @@
             <button class="modal-close" onclick="OquIDE.closeModal('about-modal')">✕</button>
         </div>
         <div class="modal-body" style="text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 12px;">🤖</div>
-            <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px;
-                        background: linear-gradient(135deg, #00d4ff, #9966ff);
-                        -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <img src="icon.ico" alt="OquBot Logo" style="width: 64px; height: 64px; margin-bottom: 12px;">
+            <div style="font-size: 22px; font-weight: 700; margin-bottom: 4px; color: #855CD6;">
                 OquBot IDE
             </div>
             <div style="color: var(--text-muted); margin-bottom: 16px; font-size: 12px;">
@@ -242,6 +276,54 @@
                 <div class="menu-dropdown-item"><span>⏹ Стоп</span><span class="shortcut" style="margin-left:auto">Shift+F5</span></div>
                 <div class="menu-dropdown-item"><span>🗑️ Удалить блок</span><span class="shortcut" style="margin-left:auto">Delete</span></div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== VOICE MODAL ======================== -->
+<div class="modal-overlay" id="voice-modal">
+    <div class="modal" style="width: 500px; display: flex; flex-direction: column; height: 600px;">
+        <div class="modal-header">
+            <div class="modal-title">🎙️ Голосовой чат с роботом</div>
+            <button class="modal-close" onclick="OquIDE.closeModal('voice-modal')">✕</button>
+        </div>
+        <div class="modal-body" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+            
+            <!-- Настройки режима -->
+            <div style="padding: 16px; background: #F9F9F9; border-bottom: 1px solid #E0E0E0; display: flex; gap: 12px;">
+                <div style="flex: 1;">
+                    <label class="setting-label">Личность</label>
+                    <select class="setting-select" id="voice-persona">
+                        <option value="persona1">Личность 1 (Обычная)</option>
+                        <option value="persona2">Личность 2 (Умная)</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label class="setting-label">Режим</label>
+                    <select class="setting-select" id="voice-mode">
+                        <option value="mode1">Режим 1 (Диалог)</option>
+                        <option value="mode2">Режим 2 (Игра)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Чат-лог -->
+            <div id="voice-chat-log" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #FFFFFF;">
+                <div style="text-align: center; color: #aaa; font-size: 12px; margin-top: auto; margin-bottom: auto;">
+                    Нажмите на микрофон внизу, чтобы сказать что-нибудь роботу.
+                </div>
+            </div>
+
+            <!-- Управление записью -->
+            <div style="padding: 16px; border-top: 1px solid #E0E0E0; background: #F9F9F9; display: flex; align-items: center; justify-content: center; gap: 16px;">
+                <button id="btn-voice-record" onclick="OquIDE.toggleVoiceRecord()" style="width: 64px; height: 64px; border-radius: 50%; border: none; background: #EC5959; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(236, 89, 89, 0.4); transition: transform 0.1s, background 0.2s; display: flex; align-items: center; justify-content: center;">
+                    🎙️
+                </button>
+                <div id="voice-status-text" style="font-size: 14px; font-weight: 700; color: #575E75; width: 120px;">
+                    Готов
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

@@ -1,18 +1,18 @@
 /* ============================================================
-   OquBot Block Programming IDE — Core Logic
-   Custom Blockly blocks, Python code generator, workspace mgmt
+   OquBot Block Programming IDE v2 — Core Logic
+   Scratch-style blocks, fixed inputs, Python code generator
    ============================================================ */
 
 // ──────────────────────────────────────────────────────────────
-// 1. CUSTOM BLOCK DEFINITIONS
+// 1. CUSTOM BLOCK DEFINITIONS (ALL FIXED)
 // ──────────────────────────────────────────────────────────────
 
 const OQUBOT_BLOCKS = [
     // ─── Robot Movement ───
     {
         type: 'oqubot_open_mouth',
-        message0: '🤖 Открыть рот на %1 градусов',
-        args0: [{ type: 'field_angle', name: 'ANGLE', angle: 45 }],
+        message0: 'открыть рот на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 45, min: 0, max: 180, precision: 1 }],
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
@@ -20,7 +20,7 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_close_mouth',
-        message0: '🤖 Закрыть рот',
+        message0: 'закрыть рот',
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
@@ -28,8 +28,8 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_move_head',
-        message0: '🤖 Повернуть голову на %1 градусов',
-        args0: [{ type: 'field_angle', name: 'ANGLE', angle: 90 }],
+        message0: 'повернуть голову на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
@@ -37,7 +37,7 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_blink',
-        message0: '🤖 Моргнуть',
+        message0: 'моргнуть',
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
@@ -45,7 +45,7 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_move_eyes',
-        message0: '🤖 Двигать глаза %1',
+        message0: 'двигать глаза %1',
         args0: [{
             type: 'field_dropdown',
             name: 'DIRECTION',
@@ -62,7 +62,7 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_led',
-        message0: '💡 Светодиод %1',
+        message0: 'светодиод %1',
         args0: [{
             type: 'field_dropdown',
             name: 'STATE',
@@ -77,7 +77,7 @@ const OQUBOT_BLOCKS = [
     // ─── Sound ───
     {
         type: 'oqubot_play_sound',
-        message0: '🔊 Воспроизвести звук %1',
+        message0: 'воспроизвести звук %1',
         args0: [{
             type: 'field_dropdown',
             name: 'SOUND',
@@ -96,8 +96,8 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_set_volume',
-        message0: '🔊 Установить громкость %1 %%',
-        args0: [{ type: 'field_number', name: 'VOLUME', value: 50, min: 0, max: 100 }],
+        message0: 'установить громкость %1 %%',
+        args0: [{ type: 'field_number', name: 'VOLUME', value: 50, min: 0, max: 100, precision: 1 }],
         previousStatement: null,
         nextStatement: null,
         colour: '#9966FF',
@@ -107,33 +107,33 @@ const OQUBOT_BLOCKS = [
     // ─── Speech ───
     {
         type: 'oqubot_say',
-        message0: '💬 Сказать %1',
-        args0: [{ type: 'input_value', name: 'TEXT', check: 'String' }],
+        message0: 'сказать %1',
+        args0: [{ type: 'input_value', name: 'TEXT' }],
         previousStatement: null,
         nextStatement: null,
-        colour: '#FF6680',
+        colour: '#CF63CF',
         tooltip: 'Робот произносит указанный текст вслух (TTS)',
     },
     {
         type: 'oqubot_ask',
-        message0: '💬 Спросить %1 и ждать ответ',
-        args0: [{ type: 'input_value', name: 'TEXT', check: 'String' }],
+        message0: 'спросить %1 и ждать ответ',
+        args0: [{ type: 'input_value', name: 'TEXT' }],
         output: 'String',
-        colour: '#FF6680',
+        colour: '#CF63CF',
         tooltip: 'Робот задаёт вопрос и возвращает ответ пользователя',
     },
     {
         type: 'oqubot_listen',
-        message0: '🎤 Слушать речь',
+        message0: 'слушать речь',
         output: 'String',
-        colour: '#FF6680',
+        colour: '#CF63CF',
         tooltip: 'Робот слушает и возвращает распознанный текст',
     },
 
     // ─── Control ───
     {
         type: 'oqubot_wait',
-        message0: '⏱ Ждать %1 секунд',
+        message0: 'ждать %1 секунд',
         args0: [{ type: 'input_value', name: 'SECONDS', check: 'Number' }],
         previousStatement: null,
         nextStatement: null,
@@ -142,8 +142,8 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_repeat',
-        message0: '🔁 Повторить %1 раз',
-        args0: [{ type: 'input_value', name: 'TIMES', check: 'Number' }],
+        message0: 'повторить %1 раз',
+        args0: [{ type: 'input_value', name: 'TIMES' }],
         message1: '%1',
         args1: [{ type: 'input_statement', name: 'DO' }],
         previousStatement: null,
@@ -153,39 +153,40 @@ const OQUBOT_BLOCKS = [
     },
     {
         type: 'oqubot_forever',
-        message0: '🔁 Повторять всегда',
+        message0: 'повторять всегда',
         message1: '%1',
         args1: [{ type: 'input_statement', name: 'DO' }],
         previousStatement: null,
         nextStatement: null,
         colour: '#FFAB19',
-        tooltip: 'Бесконечный цикл — повторяет блоки внутри бесконечно',
+        tooltip: 'Бесконечный цикл',
     },
 
     // ─── Logic ───
     {
         type: 'oqubot_if',
-        message0: '❓ Если %1',
-        args0: [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }],
-        message1: 'тогда %1',
+        message0: 'если %1 то',
+        args0: [{ type: 'input_value', name: 'CONDITION' }],
+        message1: '%1',
         args1: [{ type: 'input_statement', name: 'DO' }],
         previousStatement: null,
         nextStatement: null,
-        colour: '#59C059',
+        colour: '#FFBF00',
         tooltip: 'Выполняет блоки внутри, если условие истинно',
     },
     {
         type: 'oqubot_if_else',
-        message0: '❓ Если %1',
-        args0: [{ type: 'input_value', name: 'CONDITION', check: 'Boolean' }],
-        message1: 'тогда %1',
+        message0: 'если %1 то',
+        args0: [{ type: 'input_value', name: 'CONDITION' }],
+        message1: '%1',
         args1: [{ type: 'input_statement', name: 'DO' }],
-        message2: 'иначе %1',
-        args2: [{ type: 'input_statement', name: 'ELSE' }],
+        message2: 'иначе',
+        message3: '%1',
+        args3: [{ type: 'input_statement', name: 'ELSE' }],
         previousStatement: null,
         nextStatement: null,
-        colour: '#59C059',
-        tooltip: 'Выполняет одну группу блоков, если условие истинно, и другую — если нет',
+        colour: '#FFBF00',
+        tooltip: 'Если условие истинно — первый блок, иначе — второй',
     },
     {
         type: 'oqubot_compare',
@@ -194,10 +195,11 @@ const OQUBOT_BLOCKS = [
             { type: 'input_value', name: 'A' },
             {
                 type: 'field_dropdown', name: 'OP',
-                options: [['=', 'EQ'], ['≠', 'NEQ'], ['<', 'LT'], ['>', 'GT'], ['≤', 'LTE'], ['≥', 'GTE']],
+                options: [['=', 'EQ'], ['\\u2260', 'NEQ'], ['<', 'LT'], ['>', 'GT'], ['\\u2264', 'LTE'], ['\\u2265', 'GTE']],
             },
             { type: 'input_value', name: 'B' },
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#59C059',
         tooltip: 'Сравнивает два значения',
@@ -206,10 +208,11 @@ const OQUBOT_BLOCKS = [
         type: 'oqubot_logic_op',
         message0: '%1 %2 %3',
         args0: [
-            { type: 'input_value', name: 'A', check: 'Boolean' },
+            { type: 'input_value', name: 'A' },
             { type: 'field_dropdown', name: 'OP', options: [['и', 'AND'], ['или', 'OR']] },
-            { type: 'input_value', name: 'B', check: 'Boolean' },
+            { type: 'input_value', name: 'B' },
         ],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#59C059',
         tooltip: 'Логическое И / ИЛИ',
@@ -217,10 +220,11 @@ const OQUBOT_BLOCKS = [
     {
         type: 'oqubot_not',
         message0: 'не %1',
-        args0: [{ type: 'input_value', name: 'BOOL', check: 'Boolean' }],
+        args0: [{ type: 'input_value', name: 'BOOL' }],
+        inputsInline: true,
         output: 'Boolean',
         colour: '#59C059',
-        tooltip: 'Логическое отрицание (НЕ)',
+        tooltip: 'Логическое отрицание',
     },
 
     // ─── Math ───
@@ -229,52 +233,54 @@ const OQUBOT_BLOCKS = [
         message0: '%1',
         args0: [{ type: 'field_number', name: 'NUM', value: 0 }],
         output: 'Number',
-        colour: '#5CB1D6',
+        colour: '#4C97FF',
         tooltip: 'Числовое значение',
     },
     {
         type: 'oqubot_math',
         message0: '%1 %2 %3',
         args0: [
-            { type: 'input_value', name: 'A', check: 'Number' },
+            { type: 'input_value', name: 'A' },
             {
                 type: 'field_dropdown', name: 'OP',
-                options: [['+', 'ADD'], ['−', 'SUB'], ['×', 'MUL'], ['÷', 'DIV']],
+                options: [['+', 'ADD'], ['\\u2212', 'SUB'], ['\\u00d7', 'MUL'], ['\\u00f7', 'DIV']],
             },
-            { type: 'input_value', name: 'B', check: 'Number' },
+            { type: 'input_value', name: 'B' },
         ],
+        inputsInline: true,
         output: 'Number',
-        colour: '#5CB1D6',
+        colour: '#4C97FF',
         tooltip: 'Арифметическая операция',
     },
     {
         type: 'oqubot_random',
-        message0: '🎲 случайное от %1 до %2',
+        message0: 'случайное от %1 до %2',
         args0: [
             { type: 'field_number', name: 'FROM', value: 1 },
             { type: 'field_number', name: 'TO', value: 10 },
         ],
         output: 'Number',
-        colour: '#5CB1D6',
+        colour: '#4C97FF',
         tooltip: 'Случайное целое число в диапазоне',
     },
 
     // ─── Text ───
     {
         type: 'oqubot_text',
-        message0: '" %1 "',
+        message0: '%1',
         args0: [{ type: 'field_input', name: 'TEXT', text: 'Привет!' }],
         output: 'String',
         colour: '#FF8C1A',
-        tooltip: 'Текстовое значение (строка)',
+        tooltip: 'Текстовое значение',
     },
     {
         type: 'oqubot_text_join',
-        message0: '📝 соединить %1 и %2',
+        message0: 'соединить %1 и %2',
         args0: [
-            { type: 'input_value', name: 'A', check: 'String' },
-            { type: 'input_value', name: 'B', check: 'String' },
+            { type: 'input_value', name: 'A' },
+            { type: 'input_value', name: 'B' },
         ],
+        inputsInline: true,
         output: 'String',
         colour: '#FF8C1A',
         tooltip: 'Соединяет два текста в один',
@@ -283,29 +289,29 @@ const OQUBOT_BLOCKS = [
     // ─── Variables ───
     {
         type: 'oqubot_var_set',
-        message0: '📦 установить %1 = %2',
+        message0: 'задать %1 = %2',
         args0: [
             { type: 'field_input', name: 'VAR', text: 'x' },
             { type: 'input_value', name: 'VALUE' },
         ],
         previousStatement: null,
         nextStatement: null,
-        colour: '#c792ea',
+        colour: '#FF6680',
         tooltip: 'Создаёт переменную или присваивает ей значение',
     },
     {
         type: 'oqubot_var_get',
-        message0: '📦 %1',
+        message0: '%1',
         args0: [{ type: 'field_input', name: 'VAR', text: 'x' }],
         output: null,
-        colour: '#c792ea',
+        colour: '#FF6680',
         tooltip: 'Получить значение переменной',
     },
 
     // ─── Print / Debug ───
     {
         type: 'oqubot_print',
-        message0: '🖨 вывести %1',
+        message0: 'вывести %1',
         args0: [{ type: 'input_value', name: 'TEXT' }],
         previousStatement: null,
         nextStatement: null,
@@ -316,11 +322,23 @@ const OQUBOT_BLOCKS = [
 
 
 // ──────────────────────────────────────────────────────────────
-// 2. TOOLBOX DEFINITION
+// 2. TOOLBOX WITH SHADOW BLOCKS
 // ──────────────────────────────────────────────────────────────
 
-function blockRef(type) {
+function blockSimple(type) {
     return { kind: 'block', type: type };
+}
+
+function blockWithShadow(type, inputs) {
+    return { kind: 'block', type: type, inputs: inputs };
+}
+
+function numShadow(value) {
+    return { shadow: { type: 'oqubot_number', fields: { NUM: value } } };
+}
+
+function textShadow(value) {
+    return { shadow: { type: 'oqubot_text', fields: { TEXT: value } } };
 }
 
 const TOOLBOX = {
@@ -328,106 +346,95 @@ const TOOLBOX = {
     contents: [
         {
             kind: 'category',
-            name: '🤖 Робот',
+            name: 'Робот',
             colour: '#4C97AF',
             contents: [
-                blockRef('oqubot_open_mouth'),
-                blockRef('oqubot_close_mouth'),
-                blockRef('oqubot_move_head'),
-                blockRef('oqubot_blink'),
-                blockRef('oqubot_move_eyes'),
-                blockRef('oqubot_led'),
+                blockSimple('oqubot_open_mouth'),
+                blockSimple('oqubot_close_mouth'),
+                blockSimple('oqubot_move_head'),
+                blockSimple('oqubot_blink'),
+                blockSimple('oqubot_move_eyes'),
+                blockSimple('oqubot_led'),
             ],
         },
         {
             kind: 'category',
-            name: '🔊 Звук',
+            name: 'Звук',
             colour: '#9966FF',
             contents: [
-                blockRef('oqubot_play_sound'),
-                blockRef('oqubot_set_volume'),
+                blockSimple('oqubot_play_sound'),
+                blockSimple('oqubot_set_volume'),
             ],
         },
         {
             kind: 'category',
-            name: '💬 Речь',
-            colour: '#FF6680',
+            name: 'Речь',
+            colour: '#CF63CF',
             contents: [
-                {
-                    kind: 'block', type: 'oqubot_say',
-                    inputs: {
-                        TEXT: { shadow: { type: 'oqubot_text', fields: { TEXT: 'Привет, я OquBot!' } } }
-                    }
-                },
-                {
-                    kind: 'block', type: 'oqubot_ask',
-                    inputs: {
-                        TEXT: { shadow: { type: 'oqubot_text', fields: { TEXT: 'Как тебя зовут?' } } }
-                    }
-                },
-                blockRef('oqubot_listen'),
+                blockWithShadow('oqubot_say', { TEXT: textShadow('Привет, я OquBot!') }),
+                blockWithShadow('oqubot_ask', { TEXT: textShadow('Как тебя зовут?') }),
+                blockSimple('oqubot_listen'),
             ],
         },
         { kind: 'sep' },
         {
             kind: 'category',
-            name: '🔁 Управление',
+            name: 'Управление',
             colour: '#FFAB19',
             contents: [
-                {
-                    kind: 'block', type: 'oqubot_wait',
-                    inputs: {
-                        SECONDS: { shadow: { type: 'oqubot_number', fields: { NUM: 1 } } }
-                    }
-                },
-                {
-                    kind: 'block', type: 'oqubot_repeat',
-                    inputs: {
-                        TIMES: { shadow: { type: 'oqubot_number', fields: { NUM: 3 } } }
-                    }
-                },
-                blockRef('oqubot_forever'),
+                blockWithShadow('oqubot_wait', { SECONDS: numShadow(1) }),
+                blockWithShadow('oqubot_repeat', { TIMES: numShadow(3) }),
+                blockSimple('oqubot_forever'),
             ],
         },
         {
             kind: 'category',
-            name: '⚡ Логика',
-            colour: '#59C059',
+            name: 'Условия',
+            colour: '#FFBF00',
             contents: [
-                blockRef('oqubot_if'),
-                blockRef('oqubot_if_else'),
-                blockRef('oqubot_compare'),
-                blockRef('oqubot_logic_op'),
-                blockRef('oqubot_not'),
+                blockSimple('oqubot_if'),
+                blockSimple('oqubot_if_else'),
+                blockWithShadow('oqubot_compare', {
+                    A: numShadow(0),
+                    B: numShadow(0),
+                }),
+                blockSimple('oqubot_logic_op'),
+                blockSimple('oqubot_not'),
             ],
         },
         {
             kind: 'category',
-            name: '🔢 Математика',
-            colour: '#5CB1D6',
+            name: 'Математика',
+            colour: '#4C97FF',
             contents: [
-                blockRef('oqubot_number'),
-                blockRef('oqubot_math'),
-                blockRef('oqubot_random'),
+                blockSimple('oqubot_number'),
+                blockWithShadow('oqubot_math', {
+                    A: numShadow(0),
+                    B: numShadow(0),
+                }),
+                blockSimple('oqubot_random'),
             ],
         },
         {
             kind: 'category',
-            name: '📝 Текст',
+            name: 'Текст',
             colour: '#FF8C1A',
             contents: [
-                blockRef('oqubot_text'),
-                blockRef('oqubot_text_join'),
-                blockRef('oqubot_print'),
+                blockSimple('oqubot_text'),
+                blockWithShadow('oqubot_text_join', {
+                    A: textShadow('привет'),
+                    B: textShadow(' мир'),
+                }),
+                blockWithShadow('oqubot_print', { TEXT: textShadow('hello') }),
             ],
         },
         {
             kind: 'category',
-            name: '📦 Переменные',
-            colour: '#c792ea',
+            name: 'Переменные',
+            colour: '#FF6680',
             contents: [
-                blockRef('oqubot_var_set'),
-                blockRef('oqubot_var_get'),
+                blockWithShadow('oqubot_var_set', { VALUE: numShadow(0) }),
+                blockSimple('oqubot_var_get'),
             ],
         },
     ],
@@ -443,13 +450,11 @@ let oquPython = null;
 function initGenerator() {
     oquPython = new Blockly.Generator('OquPython');
 
-    // Precedence constants
     oquPython.ORDER_ATOMIC = 0;
     oquPython.ORDER_NONE = 99;
-
     oquPython.INDENT = '    ';
 
-    // ── Scrub: chain sequential statements ──
+    // Chain sequential statements
     oquPython.scrub_ = function (block, code, thisOnly) {
         const next = block.nextConnection && block.nextConnection.targetBlock();
         if (next && !thisOnly) {
@@ -460,47 +465,43 @@ function initGenerator() {
 
     // ── Robot ──
     oquPython.forBlock['oqubot_open_mouth'] = function (block) {
-        const angle = block.getFieldValue('ANGLE');
-        return `robot.open_mouth(${angle})\n`;
+        return 'robot.open_mouth(' + block.getFieldValue('ANGLE') + ')\n';
     };
     oquPython.forBlock['oqubot_close_mouth'] = function () {
         return 'robot.close_mouth()\n';
     };
     oquPython.forBlock['oqubot_move_head'] = function (block) {
-        const angle = block.getFieldValue('ANGLE');
-        return `robot.move_head(${angle})\n`;
+        return 'robot.move_head(' + block.getFieldValue('ANGLE') + ')\n';
     };
     oquPython.forBlock['oqubot_blink'] = function () {
         return 'robot.blink()\n';
     };
     oquPython.forBlock['oqubot_move_eyes'] = function (block) {
-        const dir = block.getFieldValue('DIRECTION');
-        const dirMap = { LEFT: '"left"', RIGHT: '"right"', CENTER: '"center"' };
-        return `robot.move_eyes(${dirMap[dir]})\n`;
+        var dir = block.getFieldValue('DIRECTION');
+        var m = { LEFT: '"left"', RIGHT: '"right"', CENTER: '"center"' };
+        return 'robot.move_eyes(' + m[dir] + ')\n';
     };
     oquPython.forBlock['oqubot_led'] = function (block) {
-        const state = block.getFieldValue('STATE');
-        return `robot.led(${state === 'ON' ? 'True' : 'False'})\n`;
+        var s = block.getFieldValue('STATE');
+        return 'robot.led(' + (s === 'ON' ? 'True' : 'False') + ')\n';
     };
 
     // ── Sound ──
     oquPython.forBlock['oqubot_play_sound'] = function (block) {
-        const sound = block.getFieldValue('SOUND');
-        return `robot.play_sound("${sound}")\n`;
+        return 'robot.play_sound("' + block.getFieldValue('SOUND') + '")\n';
     };
     oquPython.forBlock['oqubot_set_volume'] = function (block) {
-        const vol = block.getFieldValue('VOLUME');
-        return `robot.set_volume(${vol})\n`;
+        return 'robot.set_volume(' + block.getFieldValue('VOLUME') + ')\n';
     };
 
     // ── Speech ──
     oquPython.forBlock['oqubot_say'] = function (block, gen) {
-        const text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
-        return `robot.say(${text})\n`;
+        var text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
+        return 'robot.say(' + text + ')\n';
     };
     oquPython.forBlock['oqubot_ask'] = function (block, gen) {
-        const text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
-        return [`robot.ask(${text})`, gen.ORDER_ATOMIC];
+        var text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
+        return ['robot.ask(' + text + ')', gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_listen'] = function (block, gen) {
         return ['robot.listen()', gen.ORDER_ATOMIC];
@@ -508,47 +509,46 @@ function initGenerator() {
 
     // ── Control ──
     oquPython.forBlock['oqubot_wait'] = function (block, gen) {
-        const secs = gen.valueToCode(block, 'SECONDS', gen.ORDER_ATOMIC) || '1';
-        return `robot.wait(${secs})\n`;
+        var secs = gen.valueToCode(block, 'SECONDS', gen.ORDER_ATOMIC) || '1';
+        return 'robot.wait(' + secs + ')\n';
     };
     oquPython.forBlock['oqubot_repeat'] = function (block, gen) {
-        const times = gen.valueToCode(block, 'TIMES', gen.ORDER_ATOMIC) || '3';
-        const body = gen.statementToCode(block, 'DO') || `${gen.INDENT}pass\n`;
-        return `for i in range(${times}):\n${body}`;
+        var times = gen.valueToCode(block, 'TIMES', gen.ORDER_ATOMIC) || '3';
+        var body = gen.statementToCode(block, 'DO') || (gen.INDENT + 'pass\n');
+        return 'for i in range(' + times + '):\n' + body;
     };
     oquPython.forBlock['oqubot_forever'] = function (block, gen) {
-        const body = gen.statementToCode(block, 'DO') || `${gen.INDENT}pass\n`;
-        return `while True:\n${body}`;
+        var body = gen.statementToCode(block, 'DO') || (gen.INDENT + 'pass\n');
+        return 'while True:\n' + body;
     };
 
     // ── Logic ──
     oquPython.forBlock['oqubot_if'] = function (block, gen) {
-        const cond = gen.valueToCode(block, 'CONDITION', gen.ORDER_ATOMIC) || 'True';
-        const body = gen.statementToCode(block, 'DO') || `${gen.INDENT}pass\n`;
-        return `if ${cond}:\n${body}`;
+        var cond = gen.valueToCode(block, 'CONDITION', gen.ORDER_ATOMIC) || 'True';
+        var body = gen.statementToCode(block, 'DO') || (gen.INDENT + 'pass\n');
+        return 'if ' + cond + ':\n' + body;
     };
     oquPython.forBlock['oqubot_if_else'] = function (block, gen) {
-        const cond = gen.valueToCode(block, 'CONDITION', gen.ORDER_ATOMIC) || 'True';
-        const doBody = gen.statementToCode(block, 'DO') || `${gen.INDENT}pass\n`;
-        const elseBody = gen.statementToCode(block, 'ELSE') || `${gen.INDENT}pass\n`;
-        return `if ${cond}:\n${doBody}else:\n${elseBody}`;
+        var cond = gen.valueToCode(block, 'CONDITION', gen.ORDER_ATOMIC) || 'True';
+        var doBody = gen.statementToCode(block, 'DO') || (gen.INDENT + 'pass\n');
+        var elseBody = gen.statementToCode(block, 'ELSE') || (gen.INDENT + 'pass\n');
+        return 'if ' + cond + ':\n' + doBody + 'else:\n' + elseBody;
     };
     oquPython.forBlock['oqubot_compare'] = function (block, gen) {
-        const a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '0';
-        const b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '0';
-        const opMap = { EQ: '==', NEQ: '!=', LT: '<', GT: '>', LTE: '<=', GTE: '>=' };
-        const op = opMap[block.getFieldValue('OP')];
-        return [`${a} ${op} ${b}`, gen.ORDER_ATOMIC];
+        var a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '0';
+        var b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '0';
+        var opMap = { EQ: '==', NEQ: '!=', LT: '<', GT: '>', LTE: '<=', GTE: '>=' };
+        return [a + ' ' + opMap[block.getFieldValue('OP')] + ' ' + b, gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_logic_op'] = function (block, gen) {
-        const a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || 'True';
-        const b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || 'True';
-        const op = block.getFieldValue('OP') === 'AND' ? 'and' : 'or';
-        return [`${a} ${op} ${b}`, gen.ORDER_ATOMIC];
+        var a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || 'True';
+        var b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || 'True';
+        var op = block.getFieldValue('OP') === 'AND' ? 'and' : 'or';
+        return [a + ' ' + op + ' ' + b, gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_not'] = function (block, gen) {
-        const val = gen.valueToCode(block, 'BOOL', gen.ORDER_ATOMIC) || 'True';
-        return [`not ${val}`, gen.ORDER_ATOMIC];
+        var val = gen.valueToCode(block, 'BOOL', gen.ORDER_ATOMIC) || 'True';
+        return ['not ' + val, gen.ORDER_ATOMIC];
     };
 
     // ── Math ──
@@ -556,38 +556,35 @@ function initGenerator() {
         return [String(block.getFieldValue('NUM')), gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_math'] = function (block, gen) {
-        const a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '0';
-        const b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '0';
-        const opMap = { ADD: '+', SUB: '-', MUL: '*', DIV: '/' };
-        const op = opMap[block.getFieldValue('OP')];
-        return [`${a} ${op} ${b}`, gen.ORDER_ATOMIC];
+        var a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '0';
+        var b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '0';
+        var opMap = { ADD: '+', SUB: '-', MUL: '*', DIV: '/' };
+        return [a + ' ' + opMap[block.getFieldValue('OP')] + ' ' + b, gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_random'] = function (block, gen) {
-        const from = block.getFieldValue('FROM');
-        const to = block.getFieldValue('TO');
-        return [`random.randint(${from}, ${to})`, gen.ORDER_ATOMIC];
+        return ['random.randint(' + block.getFieldValue('FROM') + ', ' + block.getFieldValue('TO') + ')', gen.ORDER_ATOMIC];
     };
 
     // ── Text ──
     oquPython.forBlock['oqubot_text'] = function (block, gen) {
-        const text = block.getFieldValue('TEXT').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-        return [`"${text}"`, gen.ORDER_ATOMIC];
+        var text = block.getFieldValue('TEXT').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        return ['"' + text + '"', gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_text_join'] = function (block, gen) {
-        const a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '""';
-        const b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '""';
-        return [`${a} + ${b}`, gen.ORDER_ATOMIC];
+        var a = gen.valueToCode(block, 'A', gen.ORDER_ATOMIC) || '""';
+        var b = gen.valueToCode(block, 'B', gen.ORDER_ATOMIC) || '""';
+        return [a + ' + ' + b, gen.ORDER_ATOMIC];
     };
     oquPython.forBlock['oqubot_print'] = function (block, gen) {
-        const text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
-        return `print(${text})\n`;
+        var text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
+        return 'print(' + text + ')\n';
     };
 
     // ── Variables ──
     oquPython.forBlock['oqubot_var_set'] = function (block, gen) {
-        const varName = block.getFieldValue('VAR');
-        const val = gen.valueToCode(block, 'VALUE', gen.ORDER_ATOMIC) || '0';
-        return `${varName} = ${val}\n`;
+        var varName = block.getFieldValue('VAR');
+        var val = gen.valueToCode(block, 'VALUE', gen.ORDER_ATOMIC) || '0';
+        return varName + ' = ' + val + '\n';
     };
     oquPython.forBlock['oqubot_var_get'] = function (block, gen) {
         return [block.getFieldValue('VAR'), gen.ORDER_ATOMIC];
@@ -596,28 +593,28 @@ function initGenerator() {
 
 
 // ──────────────────────────────────────────────────────────────
-// 4. BLOCKLY THEME
+// 4. BLOCKLY THEME (SCRATCH-LIKE LIGHT)
 // ──────────────────────────────────────────────────────────────
 
 function createTheme() {
-    return Blockly.Theme.defineTheme('oqubot_dark', {
+    return Blockly.Theme.defineTheme('oqubot_light', {
         base: Blockly.Themes.Classic,
         componentStyles: {
-            workspaceBackgroundColour: '#0d0f1a',
-            toolboxBackgroundColour: '#07080f',
-            toolboxForegroundColour: '#e0e4ff',
-            flyoutBackgroundColour: '#111428',
-            flyoutForegroundColour: '#e0e4ff',
-            flyoutOpacity: 0.92,
-            scrollbarColour: '#4a5072',
-            scrollbarOpacity: 0.5,
-            insertionMarkerColour: '#00d4ff',
+            workspaceBackgroundColour: '#FFFFFF',
+            toolboxBackgroundColour: '#F9F9F9',
+            toolboxForegroundColour: '#575E75',
+            flyoutBackgroundColour: '#F9F9F9',
+            flyoutForegroundColour: '#575E75',
+            flyoutOpacity: 0.95,
+            scrollbarColour: '#CCCCCC',
+            scrollbarOpacity: 0.6,
+            insertionMarkerColour: '#855CD6',
             insertionMarkerOpacity: 0.4,
-            cursorColour: '#00d4ff',
+            cursorColour: '#855CD6',
         },
         fontStyle: {
-            family: 'Inter, sans-serif',
-            weight: '500',
+            family: 'Nunito, sans-serif',
+            weight: '700',
             size: 12,
         },
     });
@@ -628,14 +625,14 @@ function createTheme() {
 // 5. MAIN IDE CONTROLLER
 // ──────────────────────────────────────────────────────────────
 
-const OquIDE = {
+var OquIDE = {
     workspace: null,
     isRunning: false,
     isConnected: false,
     currentFile: null,
 
     // ── Initialize ──
-    init() {
+    init: function () {
         // Register custom blocks
         Blockly.defineBlocksWithJsonArray(OQUBOT_BLOCKS);
 
@@ -643,20 +640,20 @@ const OquIDE = {
         initGenerator();
 
         // Create workspace
-        const theme = createTheme();
+        var theme = createTheme();
         this.workspace = Blockly.inject('blockly-div', {
             toolbox: TOOLBOX,
             theme: theme,
             grid: {
-                spacing: 24,
-                length: 3,
-                colour: 'rgba(255,255,255,0.04)',
+                spacing: 20,
+                length: 2,
+                colour: '#E8E8E8',
                 snap: true,
             },
             zoom: {
                 controls: true,
                 wheel: true,
-                startScale: 0.9,
+                startScale: 0.85,
                 maxScale: 2,
                 minScale: 0.3,
                 scaleSpeed: 1.1,
@@ -673,18 +670,19 @@ const OquIDE = {
         });
 
         // Listen for workspace changes
-        this.workspace.addChangeListener((event) => {
+        var self = this;
+        this.workspace.addChangeListener(function (event) {
             if (event.type === Blockly.Events.BLOCK_MOVE ||
                 event.type === Blockly.Events.BLOCK_CHANGE ||
                 event.type === Blockly.Events.BLOCK_CREATE ||
                 event.type === Blockly.Events.BLOCK_DELETE) {
-                this.updateCode();
-                this.updateBlockCount();
+                self.updateCode();
+                self.updateBlockCount();
             }
         });
 
         // Handle window resize
-        window.addEventListener('resize', () => this.resizeBlockly());
+        window.addEventListener('resize', function () { self.resizeBlockly(); });
         this.resizeBlockly();
 
         // Setup resize handle for code panel
@@ -693,80 +691,82 @@ const OquIDE = {
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
 
+        // Load saved settings
+        this.loadSettings();
+
         // Hide loading, show app
-        setTimeout(() => {
+        setTimeout(function () {
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('app').style.opacity = '1';
-            document.getElementById('app').style.transition = 'opacity 0.5s ease';
-            // Re-render workspace after it becomes visible
-            setTimeout(() => Blockly.svgResize(this.workspace), 100);
-        }, 800);
+            document.getElementById('app').style.transition = 'opacity 0.4s ease';
+            setTimeout(function () { Blockly.svgResize(self.workspace); }, 100);
+        }, 600);
 
         console.log('[OquBot IDE] Initialized successfully');
     },
 
     // ── Resize Blockly to fit container ──
-    resizeBlockly() {
+    resizeBlockly: function () {
         if (!this.workspace) return;
-        const area = document.getElementById('blockly-area');
-        const div = document.getElementById('blockly-div');
+        var area = document.getElementById('blockly-area');
+        var div = document.getElementById('blockly-div');
         div.style.width = area.offsetWidth + 'px';
         div.style.height = area.offsetHeight + 'px';
         Blockly.svgResize(this.workspace);
     },
 
     // ── Code Panel Resize Handle ──
-    setupResizeHandle() {
-        const handle = document.getElementById('resize-handle');
-        const codePanel = document.getElementById('code-panel');
-        let isDragging = false;
+    setupResizeHandle: function () {
+        var handle = document.getElementById('resize-handle');
+        var codePanel = document.getElementById('code-panel');
+        var isDragging = false;
+        var self = this;
 
-        handle.addEventListener('mousedown', (e) => {
+        handle.addEventListener('mousedown', function (e) {
             isDragging = true;
             handle.classList.add('active');
             document.body.style.cursor = 'col-resize';
             e.preventDefault();
         });
 
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', function (e) {
             if (!isDragging) return;
-            const newWidth = window.innerWidth - e.clientX;
+            var newWidth = window.innerWidth - e.clientX;
             if (newWidth >= 220 && newWidth <= 600) {
                 codePanel.style.width = newWidth + 'px';
-                this.resizeBlockly();
+                self.resizeBlockly();
             }
         });
 
-        document.addEventListener('mouseup', () => {
+        document.addEventListener('mouseup', function () {
             if (isDragging) {
                 isDragging = false;
                 handle.classList.remove('active');
                 document.body.style.cursor = '';
-                this.resizeBlockly();
+                self.resizeBlockly();
             }
         });
     },
 
     // ── Update generated code ──
-    updateCode() {
+    updateCode: function () {
         if (!oquPython || !this.workspace) return;
         try {
-            let code = oquPython.workspaceToCode(this.workspace);
-            const codeOutput = document.getElementById('code-output');
+            var code = oquPython.workspaceToCode(this.workspace);
+            var codeOutput = document.getElementById('code-output');
 
             if (!code || code.trim() === '') {
-                codeOutput.innerHTML =
-                    '<span class="code-comment"># Перетащите блоки на рабочую область,\n# чтобы увидеть сгенерированный код</span>';
+                codeOutput.innerHTML = '<span class="code-comment"># Перетащите блоки на рабочую область,\n# чтобы увидеть сгенерированный код</span>';
                 return;
             }
 
-            // Add imports header
-            const imports = this.detectImports(code);
-            let fullCode = '';
+            var imports = this.detectImports(code);
+            var fullCode = '';
             if (imports.length > 0) {
                 fullCode += imports.join('\n') + '\n\n';
             }
-            fullCode += '# Подключение к роботу\nrobot = oqubot.connect()\n\n';
+            fullCode += '# Подключение к роботу\n';
+            fullCode += 'robot = oqubot.connect()\n\n';
             fullCode += '# Программа\n';
             fullCode += code;
 
@@ -776,52 +776,35 @@ const OquIDE = {
         }
     },
 
-    // ── Detect needed imports ──
-    detectImports(code) {
-        const imports = ['import oqubot'];
-        if (code.includes('random.')) imports.push('import random');
-        if (code.includes('time.')) imports.push('import time');
+    detectImports: function (code) {
+        var imports = ['import oqubot'];
+        if (code.indexOf('random.') !== -1) imports.push('import random');
         return imports;
     },
 
-    // ── Simple Python syntax highlighting ──
-    highlightPython(code) {
-        // Escape HTML
-        let html = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        // Comments
+    highlightPython: function (code) {
+        var html = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         html = html.replace(/(#.*)/g, '<span class="code-comment">$1</span>');
-
-        // Strings (double and single quoted)
         html = html.replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, '<span class="code-string">"$1"</span>');
-        html = html.replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, '<span class="code-string">\'$1\'</span>');
-
-        // Keywords
-        const keywords = ['import', 'from', 'def', 'class', 'if', 'else', 'elif',
+        html = html.replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, "<span class=\"code-string\">'$1'</span>");
+        var keywords = ['import', 'from', 'def', 'class', 'if', 'else', 'elif',
             'for', 'while', 'in', 'range', 'True', 'False', 'None',
             'not', 'and', 'or', 'return', 'pass', 'break', 'continue'];
-        keywords.forEach((kw) => {
-            const re = new RegExp(`\\b(${kw})\\b`, 'g');
-            html = html.replace(re, '<span class="code-keyword">$1</span>');
+        keywords.forEach(function (kw) {
+            html = html.replace(new RegExp('\\b(' + kw + ')\\b', 'g'), '<span class="code-keyword">$1</span>');
         });
-
-        // Numbers (not inside tags)
         html = html.replace(/\b(\d+\.?\d*)\b/g, '<span class="code-number">$1</span>');
-
-        // Function calls
         html = html.replace(/\b([a-zA-Z_]\w*)\s*\(/g, '<span class="code-function">$1</span>(');
-
         return html;
     },
 
-    // ── Update block count in menu ──
-    updateBlockCount() {
-        const count = this.workspace.getAllBlocks(false).length;
-        document.getElementById('block-count').textContent = `Блоков: ${count}`;
+    updateBlockCount: function () {
+        var count = this.workspace.getAllBlocks(false).length;
+        document.getElementById('block-count').textContent = 'Blocks: ' + count;
     },
 
     // ── File Operations ──
-    newProject() {
+    newProject: function () {
         if (this.workspace.getAllBlocks(false).length > 0) {
             if (!confirm('Создать новый проект? Несохранённые изменения будут потеряны.')) return;
         }
@@ -832,69 +815,62 @@ const OquIDE = {
         this.toast('Новый проект создан', 'info');
     },
 
-    saveProject() {
-        const data = Blockly.serialization.workspaces.save(this.workspace);
-        const json = JSON.stringify(data, null, 2);
+    saveProject: function () {
+        var data = Blockly.serialization.workspaces.save(this.workspace);
+        var json = JSON.stringify(data, null, 2);
 
-        // Try to save via pywebview API
         if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.save_project(json).then((result) => {
-                if (result) {
-                    this.currentFile = result;
-                    this.toast('Проект сохранён', 'success');
-                }
+            window.pywebview.api.save_project(json).then(function (result) {
+                if (result) OquIDE.toast('Проект сохранён', 'success');
             });
         } else {
-            // Fallback: download as file
-            const blob = new Blob([json], { type: 'application/json' });
-            const a = document.createElement('a');
+            var blob = new Blob([json], { type: 'application/json' });
+            var a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'oqubot_project.json';
             a.click();
             URL.revokeObjectURL(a.href);
-            this.toast('Проект скачан как файл', 'success');
+            this.toast('Проект скачан', 'success');
         }
     },
 
-    saveProjectAs() {
+    saveProjectAs: function () {
         this.currentFile = null;
         this.saveProject();
     },
 
-    openProject() {
+    openProject: function () {
         if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.open_project().then((result) => {
+            window.pywebview.api.open_project().then(function (result) {
                 if (result) {
                     try {
-                        const data = JSON.parse(result);
-                        Blockly.serialization.workspaces.load(data, this.workspace);
-                        this.updateCode();
-                        this.updateBlockCount();
-                        this.toast('Проект загружен', 'success');
+                        var data = JSON.parse(result);
+                        Blockly.serialization.workspaces.load(data, OquIDE.workspace);
+                        OquIDE.updateCode();
+                        OquIDE.updateBlockCount();
+                        OquIDE.toast('Проект загружен', 'success');
                     } catch (e) {
-                        this.toast('Ошибка при загрузке проекта', 'error');
-                        console.error(e);
+                        OquIDE.toast('Ошибка загрузки проекта', 'error');
                     }
                 }
             });
         } else {
-            // Fallback: file input
-            const input = document.createElement('input');
+            var input = document.createElement('input');
             input.type = 'file';
             input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
+            input.onchange = function (e) {
+                var file = e.target.files[0];
                 if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
+                var reader = new FileReader();
+                reader.onload = function (ev) {
                     try {
-                        const data = JSON.parse(ev.target.result);
-                        Blockly.serialization.workspaces.load(data, this.workspace);
-                        this.updateCode();
-                        this.updateBlockCount();
-                        this.toast('Проект загружен', 'success');
+                        var data = JSON.parse(ev.target.result);
+                        Blockly.serialization.workspaces.load(data, OquIDE.workspace);
+                        OquIDE.updateCode();
+                        OquIDE.updateBlockCount();
+                        OquIDE.toast('Проект загружен', 'success');
                     } catch (err) {
-                        this.toast('Ошибка при загрузке проекта', 'error');
+                        OquIDE.toast('Ошибка загрузки', 'error');
                     }
                 };
                 reader.readAsText(file);
@@ -903,228 +879,328 @@ const OquIDE = {
         }
     },
 
-    exportCode() {
+    exportCode: function () {
         if (!oquPython) return;
-        const code = oquPython.workspaceToCode(this.workspace);
+        var code = oquPython.workspaceToCode(this.workspace);
         if (!code.trim()) {
             this.toast('Нет блоков для экспорта', 'error');
             return;
         }
-
-        // Full code with header
-        const imports = this.detectImports(code);
-        let fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
-
-        navigator.clipboard.writeText(fullCode).then(() => {
-            this.toast('Код скопирован в буфер обмена', 'success');
-        }).catch(() => {
-            this.toast('Не удалось скопировать код', 'error');
+        var imports = this.detectImports(code);
+        var fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
+        navigator.clipboard.writeText(fullCode).then(function () {
+            OquIDE.toast('Код скопирован', 'success');
         });
     },
 
     // ── Edit Operations ──
-    undo() {
-        this.workspace.undo(false);
-    },
-    redo() {
-        this.workspace.undo(true);
-    },
-    clearWorkspace() {
+    undo: function () { this.workspace.undo(false); },
+    redo: function () { this.workspace.undo(true); },
+    clearWorkspace: function () {
         if (this.workspace.getAllBlocks(false).length === 0) return;
-        if (confirm('Удалить все блоки с рабочей области?')) {
+        if (confirm('Удалить все блоки?')) {
             this.workspace.clear();
             this.updateCode();
             this.updateBlockCount();
-            this.toast('Рабочая область очищена', 'info');
+            this.toast('Очищено', 'info');
         }
     },
 
     // ── Run / Stop ──
-    runProgram() {
+    runProgram: function () {
         if (!oquPython) return;
-        const code = oquPython.workspaceToCode(this.workspace);
+        var code = oquPython.workspaceToCode(this.workspace);
         if (!code.trim()) {
             this.toast('Добавьте блоки перед запуском', 'error');
             return;
         }
-
         this.isRunning = true;
         document.getElementById('btn-run').classList.add('action-btn--disabled');
         document.getElementById('btn-stop').classList.remove('action-btn--disabled');
 
         if (window.pywebview && window.pywebview.api) {
-            const imports = this.detectImports(code);
-            const fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
-            window.pywebview.api.run_code(fullCode).then((result) => {
-                this.toast(result || 'Программа выполнена', 'success');
-                this.stopProgram();
-            }).catch((err) => {
-                this.toast('Ошибка выполнения: ' + err, 'error');
-                this.stopProgram();
+            var imports = this.detectImports(code);
+            var fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
+            window.pywebview.api.run_code(fullCode).then(function (result) {
+                OquIDE.toast(result || 'Done', 'success');
+                OquIDE.stopProgram();
             });
         } else {
-            this.toast('▶ Программа запущена (демо-режим)', 'info');
-            setTimeout(() => this.stopProgram(), 2000);
+            this.toast('Program started (demo)', 'info');
+            var self = this;
+            setTimeout(function () { self.stopProgram(); }, 2000);
         }
     },
 
-    stopProgram() {
+    stopProgram: function () {
         this.isRunning = false;
         document.getElementById('btn-run').classList.remove('action-btn--disabled');
         document.getElementById('btn-stop').classList.add('action-btn--disabled');
-
         if (window.pywebview && window.pywebview.api) {
             window.pywebview.api.stop_code();
         }
     },
 
-    // ── Connect Robot ──
-    connectRobot() {
+    // ── Connect Robot (USB Serial) ──
+    connectRobot: function () {
         if (window.pywebview && window.pywebview.api) {
-            this.toast('Поиск робота...', 'info');
-            window.pywebview.api.connect_robot().then((result) => {
+            this.toast('Searching for robot...', 'info');
+            window.pywebview.api.connect_robot().then(function (result) {
                 if (result && result.success) {
-                    this.isConnected = true;
+                    OquIDE.isConnected = true;
                     document.getElementById('status-dot').classList.add('status-dot--connected');
-                    document.getElementById('status-text').textContent = result.port || 'Подключён';
-                    this.toast('Робот подключён!', 'success');
+                    document.getElementById('status-text').textContent = result.port || 'Connected';
+                    OquIDE.toast('Robot connected!', 'success');
                 } else {
-                    this.toast('Робот не найден', 'error');
+                    OquIDE.toast('Robot not found', 'error');
                 }
             });
         } else {
-            // Demo toggle
             this.isConnected = !this.isConnected;
-            const dot = document.getElementById('status-dot');
-            const text = document.getElementById('status-text');
+            var dot = document.getElementById('status-dot');
+            var text = document.getElementById('status-text');
             if (this.isConnected) {
                 dot.classList.add('status-dot--connected');
-                text.textContent = 'COM3 (демо)';
-                this.toast('Робот подключён (демо)', 'success');
+                text.textContent = 'COM3 (demo)';
+                this.toast('Robot connected (demo)', 'success');
             } else {
                 dot.classList.remove('status-dot--connected');
-                text.textContent = 'Не подключён';
-                this.toast('Робот отключён', 'info');
+                text.textContent = 'Not connected';
+                this.toast('Disconnected', 'info');
             }
         }
     },
 
     // ── Code Panel ──
-    toggleCodePanel() {
-        const panel = document.getElementById('code-panel');
+    toggleCodePanel: function () {
+        var panel = document.getElementById('code-panel');
         panel.classList.toggle('collapsed');
-        setTimeout(() => this.resizeBlockly(), 300);
+        var self = this;
+        setTimeout(function () { self.resizeBlockly(); }, 300);
     },
 
-    copyCode() {
-        const codeEl = document.getElementById('code-output');
-        const text = codeEl.innerText || codeEl.textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            this.toast('Код скопирован', 'success');
+    copyCode: function () {
+        var el = document.getElementById('code-output');
+        var text = el.innerText || el.textContent;
+        navigator.clipboard.writeText(text).then(function () {
+            OquIDE.toast('Code copied', 'success');
         });
     },
 
     // ── Settings ──
-    showSettings() {
+    showSettings: function () {
         document.getElementById('settings-modal').classList.add('active');
     },
-    showAbout() {
+    showAbout: function () {
         document.getElementById('about-modal').classList.add('active');
     },
-    showKeyboardShortcuts() {
+    showKeyboardShortcuts: function () {
         document.getElementById('shortcuts-modal').classList.add('active');
     },
-    closeModal(id) {
+    openModal: function (id) {
+        document.getElementById(id).classList.add('active');
+    },
+
+    closeModal: function (id) {
         document.getElementById(id).classList.remove('active');
     },
 
-    setLanguage(lang) {
-        // Store for future use (full i18n will be implemented later)
+    setLanguage: function (lang) {
         localStorage.setItem('oqubot_language', lang);
-        this.toast('Язык будет применён при следующем запуске', 'info');
+        this.toast('Language will apply on restart', 'info');
     },
 
-    setCodeFontSize(size) {
+    setCodeFontSize: function (size) {
         document.getElementById('code-output').style.fontSize = size + 'px';
         localStorage.setItem('oqubot_code_font_size', size);
     },
 
-    setSounds(value) {
-        // Blockly sounds are disabled by default in our config
-        localStorage.setItem('oqubot_sounds', value);
+    // ── API Keys ──
+    saveApiKeys: function () {
+        var groqKey = document.getElementById('setting-groq-key').value;
+        var elevenKey = document.getElementById('setting-elevenlabs-key').value;
+        localStorage.setItem('oqubot_groq_key', groqKey);
+        localStorage.setItem('oqubot_elevenlabs_key', elevenKey);
+
+        // Send to Python backend if available
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.set_api_keys(groqKey, elevenKey);
+        }
+    },
+
+    testApiKeys: function () {
+        var groqKey = document.getElementById('setting-groq-key').value;
+        var elevenKey = document.getElementById('setting-elevenlabs-key').value;
+
+        if (!groqKey && !elevenKey) {
+            this.toast('Enter at least one key', 'error');
+            return;
+        }
+
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.test_api_keys(groqKey, elevenKey).then(function (result) {
+                if (result && result.success) {
+                    OquIDE.toast('Keys verified!', 'success');
+                } else {
+                    OquIDE.toast('Key error: ' + (result ? result.error : 'unknown'), 'error');
+                }
+            });
+        } else {
+            if (groqKey) this.toast('Groq key saved (demo)', 'success');
+            if (elevenKey) this.toast('ElevenLabs key saved (demo)', 'success');
+        }
+    },
+
+    // ── Examples & Voice Chat ──
+    loadExample: function(type) {
+        var xmlString = '';
+        if (type === 'greeting') {
+            xmlString = '<xml xmlns="https://developers.google.com/blockly/xml"><block type="oqubot_say" x="50" y="50"><value name="TEXT"><shadow type="oqubot_text"><field name="TEXT">Привет! Я Окубот!</field></shadow></value><next><block type="oqubot_move_head"><field name="ANGLE">90</field></block></next></block></xml>';
+        } else if (type === 'emotions') {
+            xmlString = '<xml xmlns="https://developers.google.com/blockly/xml"><block type="oqubot_forever" x="50" y="50"><statement name="DO"><block type="oqubot_open_mouth"><field name="ANGLE">45</field><next><block type="oqubot_wait"><value name="SECONDS"><shadow type="oqubot_number"><field name="NUM">1</field></shadow></value><next><block type="oqubot_close_mouth"><next><block type="oqubot_wait"><value name="SECONDS"><shadow type="oqubot_number"><field name="NUM">1</field></shadow></value></block></next></block></next></block></next></block></statement></block></xml>';
+        } else if (type === 'logic') {
+            xmlString = '<xml xmlns="https://developers.google.com/blockly/xml"><block type="oqubot_if" x="50" y="50"><value name="CONDITION"><block type="oqubot_compare"><field name="OP">EQ</field><value name="A"><shadow type="oqubot_number"><field name="NUM">1</field></shadow></value><value name="B"><shadow type="oqubot_number"><field name="NUM">1</field></shadow></value></block></value><statement name="DO"><block type="oqubot_say"><value name="TEXT"><shadow type="oqubot_text"><field name="TEXT">Один равно один!</field></shadow></value></block></statement></block></xml>';
+        }
+        if (xmlString) {
+            this.workspace.clear();
+            var dom = Blockly.utils.xml.textToDom(xmlString);
+            Blockly.Xml.domToWorkspace(dom, this.workspace);
+            this.toast('Пример загружен', 'success');
+        }
+    },
+
+    toggleVoiceRecord: function() {
+        var btn = document.getElementById('btn-voice-record');
+        var status = document.getElementById('voice-status-text');
+        
+        if (btn.classList.contains('recording')) {
+            // Остановка
+            btn.classList.remove('recording');
+            btn.style.animation = 'none';
+            btn.style.background = '#EC5959';
+            status.textContent = 'Обработка...';
+            this.addVoiceMessage('Вы', '(запись завершена)', 'user');
+            
+            var persona = document.getElementById('voice-persona').value;
+            var mode = document.getElementById('voice-mode').value;
+            
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.stop_voice_recording(persona, mode).then(function(res) {
+                    if(res && res.text) {
+                        OquIDE.addVoiceMessage('Робот', res.text, 'bot');
+                        status.textContent = 'Готов';
+                    } else {
+                        status.textContent = 'Ошибка';
+                    }
+                });
+            } else {
+                setTimeout(() => {
+                    this.addVoiceMessage('Робот', 'Демо ответ: Я вас понял.', 'bot');
+                    status.textContent = 'Готов';
+                }, 1000);
+            }
+        } else {
+            // Старт
+            btn.classList.add('recording');
+            btn.style.animation = 'pulse-dot 1.5s infinite';
+            btn.style.background = '#4CBF56';
+            status.textContent = 'Слушаю...';
+            
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.start_voice_recording();
+            }
+        }
+    },
+    
+    addVoiceMessage: function(sender, text, type) {
+        var log = document.getElementById('voice-chat-log');
+        var div = document.createElement('div');
+        div.style.padding = '10px 14px';
+        div.style.borderRadius = '8px';
+        div.style.maxWidth = '80%';
+        div.style.fontSize = '13px';
+        div.style.lineHeight = '1.4';
+        
+        if (type === 'user') {
+            div.style.background = '#E8E0F4';
+            div.style.color = '#575E75';
+            div.style.alignSelf = 'flex-end';
+            div.innerHTML = '<b>Вы:</b><br>' + text;
+        } else {
+            div.style.background = '#F0F0F0';
+            div.style.color = '#575E75';
+            div.style.alignSelf = 'flex-start';
+            div.innerHTML = '<b>🤖 Робот:</b><br>' + text;
+        }
+        
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
     },
 
     // ── Keyboard Shortcuts ──
-    setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Close modals on Escape
+    setupKeyboardShortcuts: function () {
+        var self = this;
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.active').forEach((m) => m.classList.remove('active'));
+                document.querySelectorAll('.modal-overlay.active').forEach(function (m) {
+                    m.classList.remove('active');
+                });
                 return;
             }
-
-            // Ctrl shortcuts
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key.toLowerCase()) {
-                    case 'n':
-                        e.preventDefault();
-                        this.newProject();
-                        break;
-                    case 'o':
-                        e.preventDefault();
-                        this.openProject();
-                        break;
+                    case 'n': e.preventDefault(); self.newProject(); break;
+                    case 'o': e.preventDefault(); self.openProject(); break;
                     case 's':
                         e.preventDefault();
-                        if (e.shiftKey) this.saveProjectAs();
-                        else this.saveProject();
-                        break;
-                    case 'z':
-                        if (!e.shiftKey) {
-                            // Let Blockly handle Ctrl+Z natively
-                        }
+                        if (e.shiftKey) self.saveProjectAs();
+                        else self.saveProject();
                         break;
                 }
             }
-
-            // F5 - Run
             if (e.key === 'F5') {
                 e.preventDefault();
-                if (e.shiftKey) this.stopProgram();
-                else this.runProgram();
+                if (e.shiftKey) self.stopProgram();
+                else self.runProgram();
             }
         });
     },
 
     // ── Toast Notifications ──
-    toast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast toast--${type}`;
-
-        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-        toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> <span>${message}</span>`;
-
+    toast: function (message, type) {
+        type = type || 'info';
+        var container = document.getElementById('toast-container');
+        var toast = document.createElement('div');
+        toast.className = 'toast toast--' + type;
+        var icons = { success: '\u2705', error: '\u274c', info: '\u2139\ufe0f' };
+        toast.textContent = (icons[type] || '') + ' ' + message;
         container.appendChild(toast);
-
-        setTimeout(() => {
+        setTimeout(function () {
             toast.style.animation = 'toast-out 0.3s ease forwards';
-            setTimeout(() => toast.remove(), 300);
+            setTimeout(function () { toast.remove(); }, 300);
         }, 3000);
     },
 
     // ── Load saved settings ──
-    loadSettings() {
-        const fontSize = localStorage.getItem('oqubot_code_font_size');
+    loadSettings: function () {
+        var fontSize = localStorage.getItem('oqubot_code_font_size');
         if (fontSize) {
             document.getElementById('code-output').style.fontSize = fontSize + 'px';
-            const select = document.getElementById('setting-font-size');
-            if (select) select.value = fontSize;
+            var sel = document.getElementById('setting-font-size');
+            if (sel) sel.value = fontSize;
         }
-        const lang = localStorage.getItem('oqubot_language');
+        var lang = localStorage.getItem('oqubot_language');
         if (lang) {
-            const select = document.getElementById('setting-language');
-            if (select) select.value = lang;
+            var sel2 = document.getElementById('setting-language');
+            if (sel2) sel2.value = lang;
+        }
+        var groqKey = localStorage.getItem('oqubot_groq_key');
+        if (groqKey) {
+            document.getElementById('setting-groq-key').value = groqKey;
+        }
+        var elevenKey = localStorage.getItem('oqubot_elevenlabs_key');
+        if (elevenKey) {
+            document.getElementById('setting-elevenlabs-key').value = elevenKey;
         }
     },
 };
@@ -1134,23 +1210,18 @@ const OquIDE = {
 // 6. BOOT
 // ──────────────────────────────────────────────────────────────
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', function () {
     try {
         OquIDE.init();
-        OquIDE.loadSettings();
     } catch (e) {
-        console.error('[OquBot IDE] Initialization failed:', e);
+        console.error('[OquBot IDE] Init failed:', e);
         document.getElementById('loading-screen').innerHTML =
-            `<div class="loading-logo">OquBot IDE</div>
-             <div style="color:#ff3366; margin-top:16px;">Ошибка загрузки: ${e.message}</div>
-             <div style="color:#7b82a8; margin-top:8px; font-size:12px;">
-                Проверьте подключение к интернету (нужен CDN Blockly)
-             </div>`;
+            '<div class="loading-logo">OquBot IDE</div>' +
+            '<div style="color:#EC5959; margin-top:16px;">Error: ' + e.message + '</div>';
     }
 });
 
-// Close modals on overlay click
-document.addEventListener('click', (e) => {
+document.addEventListener('click', function (e) {
     if (e.target.classList.contains('modal-overlay')) {
         e.target.classList.remove('active');
     }
