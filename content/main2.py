@@ -9,12 +9,16 @@ from stt import SpeechRecognizer
 from generate import TextGenerator
 from tts import VoiceGenerator
 from temporaryaudio import SoundEngine
+from personalities import PERSONALITIES
+
 
 def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
+    if getattr(sys, 'frozen', False):
+        # Если это собранный .exe
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Если это обычный запуск из редактора кода
+        base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
 class OquBotAPI:
     def __init__(self):
@@ -29,11 +33,26 @@ class OquBotAPI:
         self.voice = VoiceGenerator(api_key=elevenlabs_key)
         
         self.CURRENT_LANG = "ru"
+        self.current_persona_key = "default"
         self.prompt = "Ты голосовой помощник для детей. Отвечай простым и понятным русским языком. Максимум 2 предложения."
-        
+        self.voice.voice_id = PERSONALITIES["default"]["voice_id"]
         print("Робот готов!")
 
     # 1. Функция старта записи (вызывается из JS)
+    def set_language(self, lang_code):
+        self.CURRENT_LANG = lang_code
+        print(f"OquBot: Язык переключен на '{lang_code}'")
+        return "success"
+    def set_personality(self, persona_key):
+        if persona_key in PERSONALITIES:
+            self.current_persona_key = persona_key
+            self.voice.voice_id = PERSONALITIES[persona_key]["voice_id"]
+            
+            print(f"OquBot: Личность изменена на '{PERSONALITIES[persona_key]['name']}'")
+            return "success"
+        else:
+            print(f"Ошибка: Личность '{persona_key}' не найдена!")
+            return "error"
     def start_record(self):
         print("Микрофон включен. Идет запись...")
         self.ear.start()
@@ -49,11 +68,12 @@ class OquBotAPI:
             return "Я ничего не услышал. Попробуй еще раз!"
 
         print(f"OquBot услышал: {text}")
-        
+        persona = PERSONALITIES[self.current_persona_key]
+        active_prompt = persona["prompts"].get(self.CURRENT_LANG, persona["prompts"]["ru"])
         # Генерируем ответ через мозг (Groq)
         brain_response = self.brain.generate(
             user_text=text,
-            system_prompt=self.prompt,
+            system_prompt=active_prompt,
             language=self.CURRENT_LANG
         )
         
@@ -88,4 +108,4 @@ if __name__ == '__main__':
     )
 
     # Запуск
-    webview.start(debug=True) # debug=True можно убрать перед финальной компиляцией
+    webview.start(debug=False) # debug=True можно убрать перед финальной компиляцией

@@ -33,7 +33,10 @@ def resource_path(relative_path):
 # API bridge for JS frontend (pywebview.api.*)
 # ──────────────────────────────────────────────────────────────
 class OquBotBlockAPI:
+<<<<<<< HEAD
 
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def __init__(self):
         self._running = False
         self._connected = False
@@ -223,14 +226,20 @@ class OquBotBlockAPI:
 
         self._running = False
         return "Program done (demo)"
+<<<<<<< HEAD
 
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def stop_code(self):
         """Stop current program execution"""
         self._running = False
         print("[OquBot IDE] [STOP] Program stopped")
         return True
+<<<<<<< HEAD
 
     # ── Robot Connection (USB Serial only) ──
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def connect_robot(self):
         """
         Find and connect to ESP32/Arduino via USB Serial.
@@ -243,6 +252,7 @@ class OquBotBlockAPI:
             import serial
             import serial.tools.list_ports
 
+<<<<<<< HEAD
             ports = serial.tools.list_ports.comports()
             target_port = None
 
@@ -284,6 +294,16 @@ class OquBotBlockAPI:
         print("[OquBot IDE] [--] Disconnected")
         return True
 
+=======
+        # Заглушка
+        self._connected = not self._connected
+        if self._connected:
+            print("[OquBot IDE] [OK] Robot connected (demo)")
+            return {"success": True, "port": "COM3 (demo)"}
+        else:
+            print("[OquBot IDE] [--] Robot disconnected")
+            return {"success": False, "port": None}
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def get_status(self):
         """Return current connection status"""
         return {
@@ -291,11 +311,14 @@ class OquBotBlockAPI:
             "running": self._running,
             "port": self._serial_port,
         }
+<<<<<<< HEAD
 
 
 # ──────────────────────────────────────────────────────────────
 # LAUNCH
 # ──────────────────────────────────────────────────────────────
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
 if __name__ == '__main__':
     import webview
 
@@ -314,5 +337,13 @@ if __name__ == '__main__':
         text_select=False,
     )
 
+<<<<<<< HEAD
     print("[OquBot IDE] Starting...")
     webview.start(debug=True)
+=======
+    print("[OquBot IDE] Starting application...")
+    print("[OquBot IDE] Press Ctrl+C to exit")
+
+    # Запуск (debug=True для DevTools во время разработки)
+    webview.start(debug=False)
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
