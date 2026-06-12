@@ -279,6 +279,7 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- ======================== VOICE MODAL ======================== -->
 <div class="modal-overlay" id="voice-modal">
@@ -293,16 +294,16 @@
             <div style="padding: 16px; background: #F9F9F9; border-bottom: 1px solid #E0E0E0; display: flex; gap: 12px;">
                 <div style="flex: 1;">
                     <label class="setting-label">Личность</label>
-                    <select class="setting-select" id="voice-persona">
-                        <option value="persona1">Личность 1 (Обычная)</option>
-                        <option value="persona2">Личность 2 (Умная)</option>
+                    <select class="setting-select" id="voice-persona" onchange="OquIDE.onVoiceSettingChange()">
+                        <!-- Loaded dynamically from personalities.py -->
                     </select>
                 </div>
                 <div style="flex: 1;">
                     <label class="setting-label">Режим</label>
-                    <select class="setting-select" id="voice-mode">
-                        <option value="mode1">Режим 1 (Диалог)</option>
-                        <option value="mode2">Режим 2 (Игра)</option>
+                    <select class="setting-select" id="voice-mode" onchange="OquIDE.onVoiceSettingChange()">
+                        <option value="Диалог">Режим 1 (Диалог)</option>
+                        <option value="Обучение">Режим 2 (Обучение)</option>
+                        <option value="Сказка">Режим 3 (Сказка)</option>
                     </select>
                 </div>
             </div>

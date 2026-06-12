@@ -129,6 +129,72 @@ const OQUBOT_BLOCKS = [
         colour: '#CF63CF',
         tooltip: 'Робот слушает и возвращает распознанный текст',
     },
+    {
+        type: 'oqubot_set_personality',
+        message0: 'установить личность %1',
+        args0: [{
+            type: 'field_dropdown',
+            name: 'PERSONA',
+            options: [
+                ['OquBot', 'default'],
+                ['Абай Құнанбайұлы', 'abay'],
+                ['Қаныш Сәтбаев', 'satpayev'],
+                ['Ахмет Байтұрсынұлы', 'baitursynov'],
+                ['Абылай хан', 'ablaykhan'],
+                ['Мұхтар Әуезов', 'auezov'],
+                ['Әлихан Бөкейханұлы', 'bokeikhanov'],
+                ['Ыбырай Алтынсарин', 'altynsarin'],
+                ['Бауыржан Момышұлы', 'momyshuly'],
+                ['Міржақып Дулатов', 'dulatov'],
+                ['Мұстафа Шоқай', 'shokay']
+            ],
+        }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#CF63CF',
+        tooltip: 'Устанавливает личность для генерации ответов',
+    },
+    {
+        type: 'oqubot_set_mode',
+        message0: 'установить режим %1',
+        args0: [{
+            type: 'field_dropdown',
+            name: 'MODE',
+            options: [
+                ['Диалог', 'Диалог'],
+                ['Обучение', 'Обучение'],
+                ['Сказка', 'Сказка'],
+            ],
+        }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#CF63CF',
+        tooltip: 'Устанавливает режим диалога',
+    },
+    {
+        type: 'oqubot_clear_memory',
+        message0: 'очистить память диалога',
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#CF63CF',
+        tooltip: 'Очищает историю диалога',
+    },
+    {
+        type: 'oqubot_generate_response',
+        message0: 'сгенерировать ответ на %1',
+        args0: [{ type: 'input_value', name: 'TEXT' }],
+        output: 'String',
+        colour: '#CF63CF',
+        tooltip: 'Генерирует ответ с учетом личности и истории',
+    },
+    {
+        type: 'oqubot_listen_reply',
+        message0: 'слушать и ответить',
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#CF63CF',
+        tooltip: 'Слушает пользователя, генерирует ответ и озвучивает его',
+    },
 
     // ─── Control ───
     {
@@ -374,6 +440,11 @@ const TOOLBOX = {
                 blockWithShadow('oqubot_say', { TEXT: textShadow('Привет, я OquBot!') }),
                 blockWithShadow('oqubot_ask', { TEXT: textShadow('Как тебя зовут?') }),
                 blockSimple('oqubot_listen'),
+                blockSimple('oqubot_listen_reply'),
+                blockWithShadow('oqubot_generate_response', { TEXT: textShadow('') }),
+                blockSimple('oqubot_set_personality'),
+                blockSimple('oqubot_set_mode'),
+                blockSimple('oqubot_clear_memory'),
             ],
         },
         { kind: 'sep' },
@@ -505,6 +576,24 @@ function initGenerator() {
     };
     oquPython.forBlock['oqubot_listen'] = function (block, gen) {
         return ['robot.listen()', gen.ORDER_ATOMIC];
+    };
+    oquPython.forBlock['oqubot_listen_reply'] = function () {
+        return 'robot.listen_and_reply()\n';
+    };
+    oquPython.forBlock['oqubot_generate_response'] = function (block, gen) {
+        var text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || '""';
+        return ['robot.generate_response(' + text + ')', gen.ORDER_ATOMIC];
+    };
+    oquPython.forBlock['oqubot_set_personality'] = function (block) {
+        var persona = block.getFieldValue('PERSONA');
+        return 'robot.set_personality("' + persona + '")\n';
+    };
+    oquPython.forBlock['oqubot_set_mode'] = function (block) {
+        var mode = block.getFieldValue('MODE');
+        return 'robot.set_mode("' + mode + '")\n';
+    };
+    oquPython.forBlock['oqubot_clear_memory'] = function () {
+        return 'robot.clear_memory()\n';
     };
 
     // ── Control ──
@@ -766,7 +855,6 @@ var OquIDE = {
                 fullCode += imports.join('\n') + '\n\n';
             }
             fullCode += '# Подключение к роботу\n';
-            fullCode += 'robot = oqubot.connect()\n\n';
             fullCode += '# Программа\n';
             fullCode += code;
 
@@ -777,7 +865,7 @@ var OquIDE = {
     },
 
     detectImports: function (code) {
-        var imports = ['import oqubot'];
+        var imports = ['import time'];
         if (code.indexOf('random.') !== -1) imports.push('import random');
         return imports;
     },
@@ -887,7 +975,7 @@ var OquIDE = {
             return;
         }
         var imports = this.detectImports(code);
-        var fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
+        var fullCode = imports.join('\n') + '\n\n' + code;
         navigator.clipboard.writeText(fullCode).then(function () {
             OquIDE.toast('Код скопирован', 'success');
         });
@@ -920,10 +1008,9 @@ var OquIDE = {
 
         if (window.pywebview && window.pywebview.api) {
             var imports = this.detectImports(code);
-            var fullCode = imports.join('\n') + '\n\nrobot = oqubot.connect()\n\n' + code;
+            var fullCode = imports.join('\n') + '\n\n' + code;
             window.pywebview.api.run_code(fullCode).then(function (result) {
-                OquIDE.toast(result || 'Done', 'success');
-                OquIDE.stopProgram();
+                // Do nothing, python thread will call OquIDE.stopProgram() when it finishes
             });
         } else {
             this.toast('Program started (demo)', 'info');
@@ -1019,12 +1106,16 @@ var OquIDE = {
     saveApiKeys: function () {
         var groqKey = document.getElementById('setting-groq-key').value;
         var elevenKey = document.getElementById('setting-elevenlabs-key').value;
-        localStorage.setItem('oqubot_groq_key', groqKey);
-        localStorage.setItem('oqubot_elevenlabs_key', elevenKey);
 
-        // Send to Python backend if available
+        // Send to Python backend to save to .env
         if (window.pywebview && window.pywebview.api) {
             window.pywebview.api.set_api_keys(groqKey, elevenKey);
+            this.toast('API Ключи сохранены в .env', 'success');
+        } else {
+            // Fallback for local browser testing
+            localStorage.setItem('oqubot_groq_key', groqKey);
+            localStorage.setItem('oqubot_elevenlabs_key', elevenKey);
+            this.toast('API Ключи сохранены локально', 'success');
         }
     },
 
@@ -1069,35 +1160,43 @@ var OquIDE = {
         }
     },
 
+    loadVoiceChatTemplate: function() {
+        var xmlString = '<xml xmlns="https://developers.google.com/blockly/xml"><block type="oqubot_set_personality" x="50" y="50"><field name="PERSONA">default</field><next><block type="oqubot_set_mode"><field name="MODE">Диалог</field><next><block type="oqubot_forever"><statement name="DO"><block type="oqubot_listen_reply"></block></statement></block></next></block></next></block></xml>';
+        this.workspace.clear();
+        var dom = Blockly.utils.xml.textToDom(xmlString);
+        Blockly.Xml.domToWorkspace(dom, this.workspace);
+        this.toast('Шаблон Голосового Чата загружен', 'success');
+    },
+
     toggleVoiceRecord: function() {
         var btn = document.getElementById('btn-voice-record');
         var status = document.getElementById('voice-status-text');
         
+        // If the block program is not running, let's inject the template and run it!
+        if (!OquIDE.isRunning) {
+            var blocks = OquIDE.workspace.getAllBlocks(false);
+            if (blocks.length === 0) {
+                OquIDE.loadVoiceChatTemplate();
+            }
+            OquIDE.runProgram();
+            status.textContent = 'Запуск...';
+            
+            // Auto start recording after a short delay to let python catch up
+            setTimeout(function() {
+                OquIDE.toggleVoiceRecord();
+            }, 500);
+            return;
+        }
+
         if (btn.classList.contains('recording')) {
             // Остановка
             btn.classList.remove('recording');
             btn.style.animation = 'none';
             btn.style.background = '#EC5959';
             status.textContent = 'Обработка...';
-            this.addVoiceMessage('Вы', '(запись завершена)', 'user');
-            
-            var persona = document.getElementById('voice-persona').value;
-            var mode = document.getElementById('voice-mode').value;
             
             if (window.pywebview && window.pywebview.api) {
-                window.pywebview.api.stop_voice_recording(persona, mode).then(function(res) {
-                    if(res && res.text) {
-                        OquIDE.addVoiceMessage('Робот', res.text, 'bot');
-                        status.textContent = 'Готов';
-                    } else {
-                        status.textContent = 'Ошибка';
-                    }
-                });
-            } else {
-                setTimeout(() => {
-                    this.addVoiceMessage('Робот', 'Демо ответ: Я вас понял.', 'bot');
-                    status.textContent = 'Готов';
-                }, 1000);
+                window.pywebview.api.stop_voice_recording();
             }
         } else {
             // Старт
@@ -1110,6 +1209,24 @@ var OquIDE = {
                 window.pywebview.api.start_voice_recording();
             }
         }
+    },
+    
+    onVoiceSettingChange: function() {
+        var persona = document.getElementById('voice-persona').value;
+        var mode = document.getElementById('voice-mode').value;
+        
+        localStorage.setItem('oqubot_voice_persona', persona);
+        localStorage.setItem('oqubot_voice_mode', mode);
+        
+        var blocks = OquIDE.workspace.getAllBlocks(false);
+        blocks.forEach(function(b) {
+            if (b.type === 'oqubot_set_personality') {
+                try { b.setFieldValue(persona, 'PERSONA'); } catch(e){}
+            }
+            if (b.type === 'oqubot_set_mode') {
+                try { b.setFieldValue(mode, 'MODE'); } catch(e){}
+            }
+        });
     },
     
     addVoiceMessage: function(sender, text, type) {
@@ -1194,13 +1311,26 @@ var OquIDE = {
             var sel2 = document.getElementById('setting-language');
             if (sel2) sel2.value = lang;
         }
-        var groqKey = localStorage.getItem('oqubot_groq_key');
-        if (groqKey) {
-            document.getElementById('setting-groq-key').value = groqKey;
-        }
-        var elevenKey = localStorage.getItem('oqubot_elevenlabs_key');
-        if (elevenKey) {
-            document.getElementById('setting-elevenlabs-key').value = elevenKey;
+
+        // Load API Keys from python backend
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.get_api_keys().then(function(keys) {
+                if (keys.groq) {
+                    document.getElementById('setting-groq-key').value = keys.groq;
+                }
+                if (keys.elevenlabs) {
+                    document.getElementById('setting-elevenlabs-key').value = keys.elevenlabs;
+                }
+            });
+        } else {
+            var groqKey = localStorage.getItem('oqubot_groq_key');
+            if (groqKey) {
+                document.getElementById('setting-groq-key').value = groqKey;
+            }
+            var elevenKey = localStorage.getItem('oqubot_elevenlabs_key');
+            if (elevenKey) {
+                document.getElementById('setting-elevenlabs-key').value = elevenKey;
+            }
         }
     },
 };
@@ -1224,5 +1354,33 @@ window.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('modal-overlay')) {
         e.target.classList.remove('active');
+    }
+});
+
+window.addEventListener('pywebviewready', function () {
+    if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.get_personalities().then(function (res) {
+            var select = document.getElementById('voice-persona');
+            if (select && res) {
+                select.innerHTML = '';
+                for (var key in res) {
+                    var option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = res[key];
+                    select.appendChild(option);
+                }
+                
+                var savedPersona = localStorage.getItem('oqubot_voice_persona');
+                if (savedPersona && res[savedPersona]) {
+                    select.value = savedPersona;
+                }
+                
+                var savedMode = localStorage.getItem('oqubot_voice_mode');
+                if (savedMode) {
+                    var mSelect = document.getElementById('voice-mode');
+                    if (mSelect) mSelect.value = savedMode;
+                }
+            }
+        });
     }
 });
