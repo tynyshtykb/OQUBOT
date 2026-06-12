@@ -5,7 +5,7 @@ a = Analysis(
     ['main2.py'],
     pathex=[],
     binaries=[],
-    datas=[('apikeys.env', '.'), ('loading.mp3', '.'), ('block_programming', 'block_programming')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['logo.ico'],
 )

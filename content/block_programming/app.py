@@ -27,11 +27,6 @@ def resource_path(relative_path):
 # API для взаимодействия с фронтендом (js_api для pywebview)
 # ──────────────────────────────────────────────────────────────
 class OquBotBlockAPI:
-    """
-    Мост между HTML/JS интерфейсом и Python бэкендом.
-    Методы этого класса вызываются из JavaScript через pywebview.api.*
-    """
-
     def __init__(self):
         self._running = False
         self._connected = False
@@ -109,15 +104,11 @@ class OquBotBlockAPI:
 
         self._running = False
         return "Program done (demo)"
-
-    # ── Остановка кода ──
     def stop_code(self):
         """Останавливает выполнение текущей программы"""
         self._running = False
         print("[OquBot IDE] [STOP] Program stopped")
         return True
-
-    # ── Подключение к роботу ──
     def connect_robot(self):
         """
         Ищет и подключается к ESP32/Arduino через serial.
@@ -146,8 +137,6 @@ class OquBotBlockAPI:
         else:
             print("[OquBot IDE] [--] Robot disconnected")
             return {"success": False, "port": None}
-
-    # ── Статус подключения ──
     def get_status(self):
         """Возвращает текущий статус подключения"""
         return {
@@ -155,11 +144,6 @@ class OquBotBlockAPI:
             "running": self._running,
             "port": "COM3 (демо)" if self._connected else None,
         }
-
-
-# ──────────────────────────────────────────────────────────────
-# ЗАПУСК ПРИЛОЖЕНИЯ
-# ──────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     import webview
 
@@ -186,4 +170,4 @@ if __name__ == '__main__':
     print("[OquBot IDE] Press Ctrl+C to exit")
 
     # Запуск (debug=True для DevTools во время разработки)
-    webview.start(debug=True)
+    webview.start(debug=False)
