@@ -112,6 +112,12 @@ class VirtualRobot:
         if not text:
             return ""
         
+        # Override with live settings from API if they exist!
+        if getattr(self.api, 'live_persona', None):
+            self.personality_key = self.api.live_persona
+        if getattr(self.api, 'live_mode', None):
+            self.mode = self.api.live_mode
+        
         persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
         prompt = persona["prompts"].get("ru", "Ты робот OquBot.") + f" Режим общения: {self.mode}."
         
@@ -144,6 +150,11 @@ class VirtualRobot:
     def say(self, text):
         if not text:
             return
+            
+        # Override with live settings from API if they exist!
+        if getattr(self.api, 'live_persona', None):
+            self.personality_key = self.api.live_persona
+            
         persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
         voice_id = persona.get("voice_id", "JBFqnCBsd6RMkjVDRZzb")
         
@@ -182,6 +193,9 @@ class OquBotBlockAPI:
         self._serial_port = None
         self.voice_turn_completed = threading.Event()
         self.voice_turn_result = ""
+        
+        self.live_persona = None
+        self.live_mode = None
         
         # Загружаем ключи из .env
         self._groq_key = os.getenv("GROQ_API_KEY")
@@ -241,8 +255,13 @@ class OquBotBlockAPI:
         return results
 
     def get_personalities(self):
-        """Return personality options to frontend"""
+        """Return dict of available personalities"""
         return {k: v["name"] for k, v in PERSONALITIES.items()}
+
+    def live_update_voice_settings(self, persona, mode):
+        self.live_persona = persona
+        self.live_mode = mode
+        print(f"[OquBot IDE] Live settings updated: Persona={persona}, Mode={mode}")
 
     # ── Voice UI Push To Talk ──
     def start_voice_recording(self):

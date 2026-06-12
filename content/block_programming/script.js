@@ -768,6 +768,18 @@ var OquIDE = {
                 self.updateCode();
                 self.updateBlockCount();
             }
+            // 2-way binding for voice chat panel
+            if (event.type === Blockly.Events.BLOCK_CHANGE) {
+                var block = self.workspace.getBlockById(event.blockId);
+                if (block && block.type === 'oqubot_set_personality') {
+                    document.getElementById('voice-persona').value = block.getFieldValue('PERSONA');
+                    localStorage.setItem('oqubot_voice_persona', block.getFieldValue('PERSONA'));
+                }
+                if (block && block.type === 'oqubot_set_mode') {
+                    document.getElementById('voice-mode').value = block.getFieldValue('MODE');
+                    localStorage.setItem('oqubot_voice_mode', block.getFieldValue('MODE'));
+                }
+            }
         });
 
         // Handle window resize
@@ -779,6 +791,9 @@ var OquIDE = {
 
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
+        
+        // Setup floating panel drag
+        this.setupFloatingPanelDrag();
 
         // Load saved settings
         this.loadSettings();
@@ -1091,6 +1106,55 @@ var OquIDE = {
     closeModal: function (id) {
         document.getElementById(id).classList.remove('active');
     },
+    
+    toggleVoicePanel: function () {
+        var panel = document.getElementById('voice-floating-panel');
+        if (panel.classList.contains('hidden')) {
+            panel.classList.remove('hidden');
+        } else {
+            panel.classList.add('hidden');
+        }
+    },
+    
+    setupFloatingPanelDrag: function () {
+        var header = document.getElementById('voice-panel-header');
+        var panel = document.getElementById('voice-floating-panel');
+        if (!header || !panel) return;
+        
+        var isDragging = false;
+        var startX, startY, initialX, initialY;
+        
+        header.addEventListener('mousedown', function(e) {
+            if (e.target.tagName.toLowerCase() === 'button') return;
+            isDragging = true;
+            var rect = panel.getBoundingClientRect();
+            // Store current position
+            initialX = rect.left;
+            initialY = rect.top;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // Remove fixed bottom/right so it moves freely
+            panel.style.bottom = 'auto';
+            panel.style.right = 'auto';
+            panel.style.left = initialX + 'px';
+            panel.style.top = initialY + 'px';
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            panel.style.left = (initialX + dx) + 'px';
+            panel.style.top = (initialY + dy) + 'px';
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+    },
 
     setLanguage: function (lang) {
         localStorage.setItem('oqubot_language', lang);
@@ -1217,6 +1281,10 @@ var OquIDE = {
         
         localStorage.setItem('oqubot_voice_persona', persona);
         localStorage.setItem('oqubot_voice_mode', mode);
+        
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.live_update_voice_settings(persona, mode);
+        }
         
         var blocks = OquIDE.workspace.getAllBlocks(false);
         blocks.forEach(function(b) {

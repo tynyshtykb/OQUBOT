@@ -30,105 +30,49 @@
 <!-- ======================== APP CONTAINER ======================== -->
 <div id="app" style="opacity: 0;">
 
-    <!-- ==================== MENU BAR ==================== -->
+    <!-- ==================== MENU BAR (HEADER) ==================== -->
     <div id="menu-bar">
         <div class="menu-brand">
             <img src="icon.ico" alt="OquBot Logo" class="menu-brand-icon" style="width:24px; height:24px; margin-right:8px;">
-            <span class="menu-brand-text">OquBot IDE</span>
+            <span class="menu-brand-text">OQUBOT IDE</span>
         </div>
 
-        <!-- File Menu -->
         <div class="menu-item">
-            <button class="menu-item-btn" id="menu-file-btn">Файл</button>
+            <button class="menu-item-btn" id="menu-file-btn">Проект</button>
             <div class="menu-dropdown" id="menu-file-dropdown">
-                <button class="menu-dropdown-item" id="action-new" onclick="OquIDE.newProject()">
-                    📄 Новый проект
-                    <span class="shortcut">Ctrl+N</span>
-                </button>
-                <button class="menu-dropdown-item" id="action-open" onclick="OquIDE.openProject()">
-                    📂 Открыть...
-                    <span class="shortcut">Ctrl+O</span>
-                </button>
+                <button class="menu-dropdown-item" id="action-new" onclick="OquIDE.newProject()">📄 Новый проект<span class="shortcut">Ctrl+N</span></button>
+                <button class="menu-dropdown-item" id="action-open" onclick="OquIDE.openProject()">📂 Открыть...<span class="shortcut">Ctrl+O</span></button>
                 <div class="menu-dropdown-divider"></div>
-                <button class="menu-dropdown-item" id="action-save" onclick="OquIDE.saveProject()">
-                    💾 Сохранить
-                    <span class="shortcut">Ctrl+S</span>
-                </button>
-                <button class="menu-dropdown-item" id="action-save-as" onclick="OquIDE.saveProjectAs()">
-                    📥 Сохранить как...
-                    <span class="shortcut">Ctrl+Shift+S</span>
-                </button>
+                <button class="menu-dropdown-item" id="action-save-as" onclick="OquIDE.saveProjectAs()">📥 Сохранить как...<span class="shortcut">Ctrl+Shift+S</span></button>
                 <div class="menu-dropdown-divider"></div>
-                <button class="menu-dropdown-item" id="action-export" onclick="OquIDE.exportCode()">
-                    📋 Экспорт кода
-                </button>
+                <button class="menu-dropdown-item" id="action-export" onclick="OquIDE.exportCode()">📋 Экспорт кода</button>
             </div>
         </div>
 
-        <!-- Edit Menu -->
         <div class="menu-item">
-            <button class="menu-item-btn" id="menu-edit-btn">Правка</button>
-            <div class="menu-dropdown" id="menu-edit-dropdown">
-                <button class="menu-dropdown-item" id="action-undo" onclick="OquIDE.undo()">
-                    ↩️ Отменить
-                    <span class="shortcut">Ctrl+Z</span>
-                </button>
-                <button class="menu-dropdown-item" id="action-redo" onclick="OquIDE.redo()">
-                    ↪️ Повторить
-                    <span class="shortcut">Ctrl+Y</span>
-                </button>
-                <div class="menu-dropdown-divider"></div>
-                <button class="menu-dropdown-item" id="action-clear" onclick="OquIDE.clearWorkspace()">
-                    🗑️ Очистить всё
-                </button>
-            </div>
-        </div>
-
-        <!-- Settings Menu -->
-        <div class="menu-item">
-            <button class="menu-item-btn" id="menu-settings-btn" onclick="OquIDE.showSettings()">Настройки</button>
-        </div>
-
-        <!-- Examples Menu -->
-        <div class="menu-item">
-            <button class="menu-item-btn">Примеры</button>
-            <div class="menu-dropdown">
-                <button class="menu-dropdown-item" onclick="OquIDE.loadExample('greeting')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Приветствие
-                </button>
-                <button class="menu-dropdown-item" onclick="OquIDE.loadExample('emotions')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Эмоции
-                </button>
-            </div>
-        </div>
-
-        <!-- Voice Chat Mode (Button) -->
-        <div class="menu-item" style="margin-left: 10px;">
-            <button class="menu-item-btn" style="background: rgba(255,255,255,0.2); border-radius: 6px; padding: 0 12px;" onclick="OquIDE.openModal('voice-modal')">
-                🎙️ Голосовой чат
-            </button>
-        </div>
-
-        <!-- Help Menu -->
-        <div class="menu-item">
-            <button class="menu-item-btn" id="menu-help-btn">Помощь</button>
-            <div class="menu-dropdown">
-                <button class="menu-dropdown-item" onclick="OquIDE.showAbout()">
-                    ℹ️ О программе
-                </button>
-                <button class="menu-dropdown-item" onclick="OquIDE.showKeyboardShortcuts()">
-                    ⌨️ Горячие клавиши
-                </button>
-            </div>
+            <button class="menu-item-btn" onclick="OquIDE.saveProject()">Сохранить</button>
         </div>
 
         <div class="menu-spacer"></div>
 
-        <!-- Block count -->
-        <div class="menu-status">
-            <span class="block-count" id="block-count">Блоков: 0</span>
+        <!-- Центральные кнопки запуска -->
+        <div class="header-actions-center">
+            <button class="action-btn action-btn--primary" id="btn-run" onclick="OquIDE.runProgram()">
+                ▶ Запустить
+            </button>
+            <button class="action-btn action-btn--danger action-btn--disabled" id="btn-stop" onclick="OquIDE.stopProgram()">
+                ⏹ Стоп
+            </button>
+        </div>
+
+        <div class="menu-spacer"></div>
+
+        <!-- Voice Chat & Settings -->
+        <div class="menu-item">
+            <button class="menu-item-btn" onclick="OquIDE.toggleVoicePanel()">🎙️ Голосовой чат</button>
+        </div>
+        <div class="menu-item">
+            <button class="menu-item-btn" onclick="OquIDE.showSettings()">⚙️ Настройки</button>
         </div>
     </div>
 
@@ -142,38 +86,48 @@
         <!-- Resize Handle -->
         <div id="resize-handle"></div>
 
-        <!-- Code Panel -->
-        <div id="code-panel">
-            <div class="panel-header">
-                <div class="panel-header-title">
-                    <span class="dot"></span>
-                    Python
+        <!-- Right Sidebar (Cards) -->
+        <div id="right-sidebar">
+            
+            <!-- Карточка: Статус Робота -->
+            <div class="right-card status-card">
+                <div class="card-header">
+                    <div class="card-title">Робот OquBot</div>
                 </div>
-                <div class="panel-header-actions">
-                    <button class="panel-icon-btn" onclick="OquIDE.copyCode()" data-tooltip="Копировать код">📋</button>
-                    <button class="panel-icon-btn" onclick="OquIDE.toggleCodePanel()" data-tooltip="Свернуть">✕</button>
+                <div class="card-body status-card-body">
+                    <div id="robot-status-text" style="color: var(--text-muted); font-size: 13px;">Не подключен</div>
                 </div>
             </div>
-            <div class="panel-content">
-                <pre id="code-output"><span class="code-comment"># Перетащите блоки на рабочую область,\n# чтобы увидеть сгенерированный код</span></pre>
+
+            <!-- Карточка: Python Код -->
+            <div class="right-card code-card" id="code-panel">
+                <div class="panel-header dark-header">
+                    <div class="panel-header-title">
+                        <span style="color:#A6E22E; margin-right:6px;">●</span> Python
+                    </div>
+                    <div class="panel-header-actions">
+                        <button class="panel-icon-btn dark-btn" onclick="OquIDE.copyCode()" title="Копировать код">📋</button>
+                    </div>
+                </div>
+                <div class="panel-content dark-content">
+                    <pre id="code-output"><span class="code-comment"># Перетащите блоки на рабочую область,\n# чтобы увидеть сгенерированный код</span></pre>
+                </div>
             </div>
+
         </div>
     </div>
 
-    <!-- ==================== ACTION BAR ==================== -->
-    <div id="action-bar">
-        <button class="action-btn action-btn--primary" id="btn-run" onclick="OquIDE.runProgram()">
-            ▶ Запустить
-        </button>
-        <button class="action-btn action-btn--danger action-btn--disabled" id="btn-stop" onclick="OquIDE.stopProgram()">
-            ⏹ Стоп
-        </button>
-
-        <div class="action-spacer"></div>
-
+    <!-- ==================== FOOTER (STATUS BAR) ==================== -->
+    <div id="status-bar">
         <div class="status-badge" id="status-badge">
             <span class="status-dot" id="status-dot"></span>
             <span id="status-text">Не подключён</span>
+        </div>
+        
+        <div class="footer-spacer"></div>
+        
+        <div class="footer-block-count">
+            <span class="block-count" id="block-count">Блоков: 0</span>
         </div>
     </div>
 
@@ -281,51 +235,49 @@
 </div>
 </div>
 
-<!-- ======================== VOICE MODAL ======================== -->
-<div class="modal-overlay" id="voice-modal">
-    <div class="modal" style="width: 500px; display: flex; flex-direction: column; height: 600px;">
-        <div class="modal-header">
-            <div class="modal-title">🎙️ Голосовой чат с роботом</div>
-            <button class="modal-close" onclick="OquIDE.closeModal('voice-modal')">✕</button>
+<!-- ======================== VOICE FLOATING PANEL ======================== -->
+<div id="voice-floating-panel" class="floating-panel hidden">
+    <div class="floating-panel-header" id="voice-panel-header">
+        <div class="floating-panel-title">🎙️ Голосовой чат</div>
+        <button class="modal-close" onclick="OquIDE.toggleVoicePanel()" style="color:white;">✕</button>
+    </div>
+    <div class="floating-panel-body" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+        
+        <!-- Настройки режима -->
+        <div style="padding: 12px; background: #F9F9F9; border-bottom: 1px solid #E0E0E0; display: flex; gap: 8px;">
+            <div style="flex: 1;">
+                <label class="setting-label" style="font-size:11px;">Личность</label>
+                <select class="setting-select" id="voice-persona" onchange="OquIDE.onVoiceSettingChange()" style="padding:4px; font-size:12px;">
+                    <!-- Loaded dynamically from personalities.py -->
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label class="setting-label" style="font-size:11px;">Режим</label>
+                <select class="setting-select" id="voice-mode" onchange="OquIDE.onVoiceSettingChange()" style="padding:4px; font-size:12px;">
+                    <option value="Диалог">Диалог</option>
+                    <option value="Обучение">Обучение</option>
+                    <option value="Сказка">Сказка</option>
+                </select>
+            </div>
         </div>
-        <div class="modal-body" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
-            
-            <!-- Настройки режима -->
-            <div style="padding: 16px; background: #F9F9F9; border-bottom: 1px solid #E0E0E0; display: flex; gap: 12px;">
-                <div style="flex: 1;">
-                    <label class="setting-label">Личность</label>
-                    <select class="setting-select" id="voice-persona" onchange="OquIDE.onVoiceSettingChange()">
-                        <!-- Loaded dynamically from personalities.py -->
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label class="setting-label">Режим</label>
-                    <select class="setting-select" id="voice-mode" onchange="OquIDE.onVoiceSettingChange()">
-                        <option value="Диалог">Режим 1 (Диалог)</option>
-                        <option value="Обучение">Режим 2 (Обучение)</option>
-                        <option value="Сказка">Режим 3 (Сказка)</option>
-                    </select>
-                </div>
-            </div>
 
-            <!-- Чат-лог -->
-            <div id="voice-chat-log" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #FFFFFF;">
-                <div style="text-align: center; color: #aaa; font-size: 12px; margin-top: auto; margin-bottom: auto;">
-                    Нажмите на микрофон внизу, чтобы сказать что-нибудь роботу.
-                </div>
+        <!-- Чат-лог -->
+        <div id="voice-chat-log" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: #FFFFFF; height: 250px;">
+            <div style="text-align: center; color: #aaa; font-size: 11px; margin-top: auto; margin-bottom: auto;">
+                Нажмите на микрофон внизу, чтобы говорить.
             </div>
-
-            <!-- Управление записью -->
-            <div style="padding: 16px; border-top: 1px solid #E0E0E0; background: #F9F9F9; display: flex; align-items: center; justify-content: center; gap: 16px;">
-                <button id="btn-voice-record" onclick="OquIDE.toggleVoiceRecord()" style="width: 64px; height: 64px; border-radius: 50%; border: none; background: #EC5959; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(236, 89, 89, 0.4); transition: transform 0.1s, background 0.2s; display: flex; align-items: center; justify-content: center;">
-                    🎙️
-                </button>
-                <div id="voice-status-text" style="font-size: 14px; font-weight: 700; color: #575E75; width: 120px;">
-                    Готов
-                </div>
-            </div>
-
         </div>
+
+        <!-- Управление записью -->
+        <div style="padding: 12px; border-top: 1px solid #E0E0E0; background: #F9F9F9; display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <button id="btn-voice-record" onclick="OquIDE.toggleVoiceRecord()" style="width: 50px; height: 50px; border-radius: 50%; border: none; background: #EC5959; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(236, 89, 89, 0.4); transition: transform 0.1s, background 0.2s; display: flex; align-items: center; justify-content: center;">
+                🎙️
+            </button>
+            <div id="voice-status-text" style="font-size: 13px; font-weight: 700; color: #575E75; width: 100px;">
+                Готов
+            </div>
+        </div>
+
     </div>
 </div>
 
