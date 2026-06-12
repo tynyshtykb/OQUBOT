@@ -1,24 +1,9 @@
-"""
-OquBot Block Programming IDE v2 — Desktop Launcher
-====================================================
-Launches the visual block programming IDE as a desktop app via pywebview.
-Connects to ESP32/Arduino via USB Serial.
-
-Usage:
-    python app.py
-"""
-
 import os
 import sys
-import json
 import threading
+import json
 import time
-
-# Add parent dir to path for imports
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
+from dotenv import load_dotenv, set_key
 
 def resource_path(relative_path):
     """Returns absolute path, works in dev and in .exe (PyInstaller)"""
@@ -28,6 +13,162 @@ def resource_path(relative_path):
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
 
+# Ensure content dir is in path
+content_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if content_dir not in sys.path:
+    sys.path.append(content_dir)
+
+ENV_PATH = os.path.join(content_dir, '.env')
+load_dotenv(dotenv_path=ENV_PATH)
+
+from personalities import PERSONALITIES
+
+# ──────────────────────────────────────────────────────────────
+# Virtual Robot Class for Hardware Simulation and Execution
+# ──────────────────────────────────────────────────────────────
+class VirtualRobot:
+    def __init__(self, api_ref):
+        self.api = api_ref
+        self.history = []
+        self.personality_key = "default"
+        self.mode = "Диалог"
+        
+    def _send(self, cmd):
+        print(f"\033[96m[OquBot Serial]\033[0m -> SEND: {cmd}")
+        if self.api._serial:
+            try:
+                self.api._serial.write((cmd + '\n').encode('utf-8'))
+            except Exception as e:
+                print(f"[OquBot Serial Error]: {e}")
+
+    # ── Motors & IO ──
+    def open_mouth(self, angle):
+        print(f"\033[93m[OquBot Simulation]\033[0m Открываю рот на {angle} градусов")
+        self._send(f"MOUTH_ANGLE:{angle}")
+
+    def close_mouth(self):
+        print(f"\033[93m[OquBot Simulation]\033[0m Закрываю рот")
+        self._send("MOUTH_ANGLE:0")
+
+    def move_head(self, angle):
+        print(f"\033[93m[OquBot Simulation]\033[0m Поворачиваю голову на {angle} градусов")
+        self._send(f"HEAD_ANGLE:{angle}")
+
+    def blink(self):
+        print(f"\033[93m[OquBot Simulation]\033[0m Моргнул")
+        self._send("EYES:BLINK")
+
+    def move_eyes(self, direction):
+        print(f"\033[93m[OquBot Simulation]\033[0m Глаза в направлении: {direction}")
+        self._send(f"EYES_DIR:{direction.upper()}")
+
+    def led(self, state):
+        print(f"\033[93m[OquBot Simulation]\033[0m LED {'ВКЛ' if state else 'ВЫКЛ'}")
+        self._send(f"LED:{1 if state else 0}")
+
+    def play_sound(self, sound_name):
+        print(f"\033[93m[OquBot Simulation]\033[0m Проигрываю звук: {sound_name}")
+        self._send(f"PLAY_SOUND:{sound_name}")
+
+    def set_volume(self, vol):
+        print(f"\033[93m[OquBot Simulation]\033[0m Громкость: {vol}")
+        self._send(f"VOLUME:{vol}")
+
+    # ── Voice & LLM ──
+    def set_personality(self, key):
+        self.personality_key = key
+        print(f"\033[94m[OquBot Memory]\033[0m Личность установлена: {key}")
+
+    def set_mode(self, mode):
+        self.mode = mode
+        print(f"\033[94m[OquBot Memory]\033[0m Режим установлен: {mode}")
+
+    def clear_memory(self):
+        self.history = []
+        print(f"\033[94m[OquBot Memory]\033[0m Память диалога очищена")
+
+    def listen(self):
+        if not hasattr(self.api, "voice_turn_completed"):
+            self.api.voice_turn_completed = threading.Event()
+            self.api.voice_turn_result = ""
+
+        self.api.evaluate_js("document.getElementById('voice-status-text').textContent = 'Готов (Жду кнопку)';")
+        print(f"\033[95m[OquBot STT]\033[0m Блок ожидает нажатия кнопки в интерфейсе...")
+        
+        self.api.voice_turn_completed.clear()
+        
+        while not self.api.voice_turn_completed.is_set():
+            if getattr(self.api, '_stop_requested', False) or not getattr(self.api, '_running', True):
+                return ""
+            time.sleep(0.1)
+
+        return self.api.voice_turn_result
+
+    def ask(self, text):
+        self.say(text)
+        return self.listen()
+
+    def generate_response(self, text):
+        if not text:
+            return ""
+        
+        persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
+        prompt = persona["prompts"].get("ru", "Ты робот OquBot.") + f" Режим общения: {self.mode}."
+        
+        print(f"\033[94m[OquBot LLM]\033[0m Генерирую ответ на: '{text}' (Личность: {persona['name']}, Режим: {self.mode})")
+        answer = ""
+        if self.api._groq_key:
+            try:
+                from generate import TextGenerator
+                if not getattr(self.api, 'llm', None):
+                    self.api.llm = TextGenerator(api_key=self.api._groq_key)
+                
+                answer = self.api.llm.generate(text, prompt, history=self.history)
+                if answer:
+                    self.history.append({"role": "user", "content": text})
+                    self.history.append({"role": "assistant", "content": answer})
+                    if len(self.history) > 10:
+                        self.history = self.history[-10:]
+            except Exception as e:
+                print(f"[OquBot LLM Error]: {e}")
+                answer = "Извините, произошла ошибка."
+        else:
+            answer = f"Это тестовый ответ от {persona['name']}."
+
+        print(f"\033[94m[OquBot LLM]\033[0m Ответ: {answer}")
+        safe_ans = answer.replace('"', '\\"').replace('\n', '<br>')
+        self.api.evaluate_js(f"OquIDE.addVoiceMessage('Робот', '{safe_ans}', 'bot');")
+        self.api.evaluate_js("document.getElementById('voice-status-text').textContent = 'Готов';")
+        return answer
+
+    def say(self, text):
+        if not text:
+            return
+        persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
+        voice_id = persona.get("voice_id", "JBFqnCBsd6RMkjVDRZzb")
+        
+        print(f"\033[92m[OquBot TTS]\033[0m Говорю (голос {voice_id}): {text}")
+        if self.api._elevenlabs_key:
+            try:
+                from tts import VoiceGenerator
+                if not self.api.tts:
+                    self.api.tts = VoiceGenerator(api_key=self.api._elevenlabs_key)
+                self.api.tts.speak(text, voice_id=voice_id)
+            except Exception as e:
+                print(f"[OquBot TTS Error]: {e}")
+        else:
+            print("[OquBot Simulation] (No ElevenLabs Key to speak aloud)")
+
+    def listen_and_reply(self):
+        user_text = self.listen()
+        if user_text:
+            answer = self.generate_response(user_text)
+            self.say(answer)
+
+    def wait(self, seconds):
+        print(f"\033[93m[OquBot Simulation]\033[0m Жду {seconds} секунд...")
+        time.sleep(seconds)
+
 
 # ──────────────────────────────────────────────────────────────
 # API bridge for JS frontend (pywebview.api.*)
@@ -35,11 +176,16 @@ def resource_path(relative_path):
 class OquBotBlockAPI:
     def __init__(self):
         self._running = False
+        self._stop_requested = False
         self._connected = False
         self._serial = None
         self._serial_port = None
-        self._groq_key = None
-        self._elevenlabs_key = None
+        self.voice_turn_completed = threading.Event()
+        self.voice_turn_result = ""
+        
+        # Загружаем ключи из .env
+        self._groq_key = os.getenv("GROQ_API_KEY")
+        self._elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
         
         # Voice modules
         self.stt = None
@@ -49,11 +195,24 @@ class OquBotBlockAPI:
         print("[OquBot IDE] API initialized")
 
     # ── API Keys ──
+    def get_api_keys(self):
+        """Return keys to frontend to populate settings"""
+        return {
+            "groq": self._groq_key or "",
+            "elevenlabs": self._elevenlabs_key or ""
+        }
+
     def set_api_keys(self, groq_key, elevenlabs_key):
-        """Store API keys from the settings UI"""
+        """Store API keys into .env file"""
         self._groq_key = groq_key if groq_key else None
         self._elevenlabs_key = elevenlabs_key if elevenlabs_key else None
-        print("[OquBot IDE] API keys updated")
+        
+        if groq_key:
+            set_key(ENV_PATH, "GROQ_API_KEY", groq_key)
+        if elevenlabs_key:
+            set_key(ENV_PATH, "ELEVENLABS_API_KEY", elevenlabs_key)
+            
+        print("[OquBot IDE] API keys saved to .env")
         return True
 
     def test_api_keys(self, groq_key, elevenlabs_key):
@@ -63,92 +222,76 @@ class OquBotBlockAPI:
 
         if groq_key:
             try:
-                from groq import Groq
-                client = Groq(api_key=groq_key)
-                client.chat.completions.create(
-                    messages=[{"role": "user", "content": "test"}],
-                    model="llama-3.3-70b-versatile",
-                    max_tokens=5
-                )
-                print("[OquBot IDE] Groq key: OK")
+                from stt import SpeechRecognizer
+                SpeechRecognizer(api_key=groq_key)
             except Exception as e:
-                errors.append("Groq: " + str(e)[:80])
-                print("[OquBot IDE] Groq key: FAIL - " + str(e)[:80])
-
+                errors.append(f"Groq error: {e}")
+                
         if elevenlabs_key:
             try:
-                from elevenlabs.client import ElevenLabs
-                client = ElevenLabs(api_key=elevenlabs_key)
-                client.voices.get_all()
-                print("[OquBot IDE] ElevenLabs key: OK")
+                from tts import VoiceGenerator
+                VoiceGenerator(api_key=elevenlabs_key)
             except Exception as e:
-                errors.append("ElevenLabs: " + str(e)[:80])
-                print("[OquBot IDE] ElevenLabs key: FAIL - " + str(e)[:80])
+                errors.append(f"ElevenLabs error: {e}")
 
         if errors:
             results["success"] = False
-            results["error"] = "; ".join(errors)
-
+            results["error"] = " | ".join(errors)
+            
         return results
 
-    # ── Voice Chat ──
+    def get_personalities(self):
+        """Return personality options to frontend"""
+        return {k: v["name"] for k, v in PERSONALITIES.items()}
+
+    # ── Voice UI Push To Talk ──
     def start_voice_recording(self):
-        if not self._groq_key:
-            print("[OquBot IDE] Groq Key missing")
-            return {"error": "Groq API Key missing"}
-        try:
-            from stt import SpeechRecognizer
-            if not self.stt:
-                self.stt = SpeechRecognizer(api_key=self._groq_key)
-            self.stt.start()
-            print("[OquBot IDE] Voice recording started...")
-            return {"success": True}
-        except Exception as e:
-            print(f"[OquBot IDE] Error starting STT: {e}")
-            return {"error": str(e)}
+        print(f"\033[95m[OquBot STT]\033[0m Микрофон включен. Идет запись...")
+        if self._groq_key:
+            try:
+                from stt import SpeechRecognizer
+                if not self.stt:
+                    self.stt = SpeechRecognizer(api_key=self._groq_key)
+                self.stt.start()
+            except Exception as e:
+                print(f"Ошибка старта STT: {e}")
+        return True
 
-    def stop_voice_recording(self, persona, mode):
-        if not self.stt:
-            return {"error": "Not recording"}
-        try:
-            print("[OquBot IDE] Voice recording stopped. Processing STT...")
-            text = self.stt.stop()
-            if not text:
-                return {"error": "No voice detected"}
+    def stop_voice_recording(self):
+        print(f"\033[95m[OquBot STT]\033[0m Запись остановлена. Обработка...")
+        res_text = ""
+        if self._groq_key and self.stt:
+            try:
+                res_text = self.stt.stop() or ""
+            except Exception as e:
+                print(f"Ошибка стопа STT: {e}")
+                res_text = ""
+        else:
+            res_text = "Тестовый текст (нет API ключа)"
             
-            print(f"[OquBot IDE] User said: {text}")
-            
-            # Form prompt
-            prompt = f"Ты дружелюбный робот-аниматроник OquBot. Отвечай кратко, 1-2 предложения. Личность: {persona}, Режим: {mode}."
-            
-            from generate import TextGenerator
-            if not self.llm:
-                self.llm = TextGenerator(api_key=self._groq_key)
-            
-            print("[OquBot IDE] Generating answer...")
-            answer = self.llm.generate(text, prompt)
-            print(f"[OquBot IDE] Robot answer: {answer}")
-            
-            if self._elevenlabs_key and answer:
-                try:
-                    from tts import VoiceGenerator
-                    if not self.tts:
-                        self.tts = VoiceGenerator(api_key=self._elevenlabs_key)
-                    
-                    def play_audio():
-                        self.tts.speak(answer)
-                    threading.Thread(target=play_audio).start()
-                except Exception as tts_e:
-                    print(f"[OquBot IDE] TTS Error: {tts_e}")
+        print(f"\033[95m[OquBot STT]\033[0m Распознано: {res_text}")
+        
+        # Send text back to UI log
+        safe_text = res_text.replace('"', '\\"').replace('\n', ' ')
+        self.evaluate_js(f"OquIDE.addVoiceMessage('Вы', '{safe_text}', 'user');")
+        self.evaluate_js("document.getElementById('voice-status-text').textContent = 'Обработка...';")
 
-            return {"text": answer or "Ошибка генерации"}
+        # Unlock the VirtualRobot block
+        self.voice_turn_result = res_text
+        self.voice_turn_completed.set()
+        
+        return res_text
+
+    def evaluate_js(self, js_code):
+        import webview
+        try:
+            if len(webview.windows) > 0:
+                webview.windows[0].evaluate_js(js_code)
         except Exception as e:
-            print(f"[OquBot IDE] Voice error: {e}")
-            return {"error": str(e)}
+            pass
 
     # ── Project Save/Open ──
     def save_project(self, json_data):
-        """Save project JSON to file via dialog"""
         import webview
         try:
             result = webview.windows[0].create_file_dialog(
@@ -170,7 +313,6 @@ class OquBotBlockAPI:
         return None
 
     def open_project(self):
-        """Open project JSON from file via dialog"""
         import webview
         try:
             result = webview.windows[0].create_file_dialog(
@@ -190,22 +332,13 @@ class OquBotBlockAPI:
 
     # ── Run Code (Serial to ESP32) ──
     def run_code(self, code):
-        """
-        Execute generated Python code by sending Serial commands to ESP32.
-        Currently a stub — will be implemented when ESP32 firmware is ready.
-
-        Future flow:
-        1. Parse code lines into commands
-        2. For each command, send Serial text: "MOUTH:45\\n", "HEAD:90\\n", etc.
-        3. Wait for "OK\\n" response from ESP32
-        4. Handle timing (wait blocks) locally
-        """
+        """Execute generated Python code in a safe thread, simulating hardware."""
         if self._running:
             return "Already running"
 
         self._running = True
         print("\n" + "=" * 50)
-        print("[OquBot IDE] Running program:")
+        print("[OquBot IDE] Запуск программы из блоков...")
         print("-" * 50)
         print(code)
         print("=" * 50)
@@ -222,41 +355,38 @@ class OquBotBlockAPI:
 
         self._running = False
         return "Program done (demo)"
+<<<<<<< HEAD
+
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def stop_code(self):
         """Stop current program execution"""
         self._running = False
         print("[OquBot IDE] [STOP] Program stopped")
         return True
+<<<<<<< HEAD
 
     # ── Robot Connection (USB Serial only) ──
     def connect_robot(self):
-        """
-        Find and connect to ESP32/Arduino via USB Serial.
-        Uses the same detection logic as serial_esp.py:
-        looks for CH340, CP210x, or UART in port description.
-        """
         print("[OquBot IDE] [SERIAL] Searching for robot...")
-
         try:
             import serial
             import serial.tools.list_ports
 
+<<<<<<< HEAD
             ports = serial.tools.list_ports.comports()
             target_port = None
-
             for port in ports:
                 desc = port.description.upper()
                 if "CH340" in desc or "CP210" in desc or "UART" in desc:
                     target_port = port.device
                     break
-
-            # Fallback: use first available port
             if not target_port and ports:
                 target_port = ports[0].device
 
             if target_port:
                 self._serial = serial.Serial(target_port, 115200, timeout=1)
-                time.sleep(2)  # Wait for ESP32 reset
+                time.sleep(2)
                 self._connected = True
                 self._serial_port = target_port
                 print("[OquBot IDE] [OK] Connected to " + target_port)
@@ -264,16 +394,11 @@ class OquBotBlockAPI:
             else:
                 print("[OquBot IDE] [--] No serial ports found")
                 return {"success": False, "port": None}
-
-        except ImportError:
-            print("[OquBot IDE] [--] pyserial not installed. Run: pip install pyserial")
-            return {"success": False, "port": None, "error": "pyserial not installed"}
         except Exception as e:
             print("[OquBot IDE] [--] Serial error: " + str(e))
             return {"success": False, "port": None, "error": str(e)}
 
     def disconnect_robot(self):
-        """Disconnect from robot"""
         if self._serial:
             self._serial.close()
             self._serial = None
@@ -283,17 +408,19 @@ class OquBotBlockAPI:
         return True
 
     def get_status(self):
-        """Return current connection status"""
         return {
             "connected": self._connected,
             "running": self._running,
             "port": self._serial_port,
         }
+<<<<<<< HEAD
 
 
 # ──────────────────────────────────────────────────────────────
 # LAUNCH
 # ──────────────────────────────────────────────────────────────
+=======
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
 if __name__ == '__main__':
     import webview
 
@@ -313,4 +440,11 @@ if __name__ == '__main__':
     )
 
     print("[OquBot IDE] Starting...")
+    webview.start(debug=True)
+=======
+    print("[OquBot IDE] Starting application...")
+    print("[OquBot IDE] Press Ctrl+C to exit")
+
+    # Запуск (debug=True для DevTools во время разработки)
     webview.start(debug=False)
+>>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2

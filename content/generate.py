@@ -6,11 +6,12 @@ class TextGenerator:
         """Инициализация клиента Groq с переданным ключом."""
         self.client = Groq(api_key=api_key)
 
-    def generate(self, user_text, system_prompt, language="kk"):
+    def generate(self, user_text, system_prompt, language="kk", history=None):
         """
         Универсальный генератор текста.
         - language="kk": использует тяжелую Llama 70B для казахского.
         - language="ru" (или любой другой): использует сверхбыструю Llama 8B.
+        - history: список предыдущих сообщений [{"role": "user", "content": "..."}, ...]
         """
         if not user_text or not system_prompt:
             return None
@@ -22,11 +23,13 @@ class TextGenerator:
         model_choice = "llama-3.3-70b-versatile" if language == "kk" else "llama-3.1-8b-instant"
 
         try:
+            messages = [{"role": "system", "content": system_prompt}]
+            if history:
+                messages.extend(history)
+            messages.append({"role": "user", "content": user_text})
+
             response = self.client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_text},
-                ],
+                messages=messages,
                 model=model_choice,
             )
             answer = response.choices[0].message.content

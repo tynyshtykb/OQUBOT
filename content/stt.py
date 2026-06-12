@@ -1,15 +1,17 @@
-import wave
-import pyaudio
+import sounddevice as sd
+import soundfile as sf
 import threading
 from groq import Groq
 import tempfile
 import os
+import numpy as np
+
 TEMP_DIR = tempfile.gettempdir()
 MIC_FILE_PATH = os.path.join(TEMP_DIR, "temp_mic.wav")
+
 class SpeechRecognizer:
     def __init__(self, api_key):
         self.client = Groq(api_key=api_key)
-        self.p = pyaudio.PyAudio()
         self.is_recording = False
         self.frames = []
         self.stream = None
@@ -19,31 +21,31 @@ class SpeechRecognizer:
         if self.is_recording: return
         self.is_recording = True
         self.frames = []
-        self.stream = self.p.open(format=pyaudio.paInt16, channels=1, rate=16000, 
-                                  input=True, frames_per_buffer=1024)
-        self.thread = threading.Thread(target=self._record_loop)
-        self.thread.start()
+        
+        def callback(indata, frames, time, status):
+            if status:
+                print(status)
+            if self.is_recording:
+                self.frames.append(indata.copy())
 
-    def _record_loop(self):
-        while self.is_recording:
-            try: self.frames.append(self.stream.read(1024, exception_on_overflow=False))
-            except: break
+        self.stream = sd.InputStream(samplerate=16000, channels=1, dtype='int16', callback=callback)
+        self.stream.start()
 
     def stop(self, temp_file=MIC_FILE_PATH):
         """Остановить запись и вернуть распознанный текст"""
         if not self.is_recording: return None
         
         self.is_recording = False
-        self.thread.join()
-        self.stream.stop_stream()
-        self.stream.close()
+        if self.stream:
+            self.stream.stop()
+            self.stream.close()
+
+        if not self.frames:
+            return None
 
         # Сохраняем звук
-        with wave.open(temp_file, "wb") as w:
-            w.setnchannels(1)
-            w.setsampwidth(self.p.get_sample_size(pyaudio.paInt16))
-            w.setframerate(16000)
-            w.writeframes(b"".join(self.frames))
+        audio_data = np.concatenate(self.frames, axis=0)
+        sf.write(temp_file, audio_data, 16000)
 
         # Отправляем в Groq Whisper
         try:
