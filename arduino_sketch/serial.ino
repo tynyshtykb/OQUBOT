@@ -7,6 +7,7 @@ void loop() {
 char a = Serial.read();
 if(a == 'p') {
 digitalWrite(2,1);
+
 }
 else digitalWrite(2,0);
 

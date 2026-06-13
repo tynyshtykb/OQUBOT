@@ -355,17 +355,11 @@ class OquBotBlockAPI:
 
         self._running = False
         return "Program done (demo)"
-<<<<<<< HEAD
-
-=======
->>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
     def stop_code(self):
         """Stop current program execution"""
         self._running = False
         print("[OquBot IDE] [STOP] Program stopped")
         return True
-<<<<<<< HEAD
-
     # ── Robot Connection (USB Serial only) ──
     def connect_robot(self):
         print("[OquBot IDE] [SERIAL] Searching for robot...")
@@ -373,7 +367,6 @@ class OquBotBlockAPI:
             import serial
             import serial.tools.list_ports
 
-<<<<<<< HEAD
             ports = serial.tools.list_ports.comports()
             target_port = None
             for port in ports:
@@ -413,14 +406,6 @@ class OquBotBlockAPI:
             "running": self._running,
             "port": self._serial_port,
         }
-<<<<<<< HEAD
-
-
-# ──────────────────────────────────────────────────────────────
-# LAUNCH
-# ──────────────────────────────────────────────────────────────
-=======
->>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
 if __name__ == '__main__':
     import webview
 
@@ -440,11 +425,9 @@ if __name__ == '__main__':
     )
 
     print("[OquBot IDE] Starting...")
-    webview.start(debug=True)
-=======
+    webview.start(debug=False)
+
     print("[OquBot IDE] Starting application...")
     print("[OquBot IDE] Press Ctrl+C to exit")
-
-    # Запуск (debug=True для DevTools во время разработки)
     webview.start(debug=False)
->>>>>>> 58e33f299a39361f6ea6c5acd902dbd6527723d2
+
