@@ -36,29 +36,58 @@ const OQUBOT_BLOCKS = [
         tooltip: 'Поворачивает голову робота (0=лево, 90=центр, 180=право)',
     },
     {
-        type: 'oqubot_blink',
-        message0: 'моргнуть',
+        type: 'oqubot_eye_vertical',
+        message0: 'глаза вверх–вниз на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
-        tooltip: 'Робот моргает глазами один раз',
+        tooltip: 'Поворачивает глаза по вертикали (серво вверх/вниз, 0-180)',
     },
     {
-        type: 'oqubot_move_eyes',
-        message0: 'двигать глаза %1',
-        args0: [{
-            type: 'field_dropdown',
-            name: 'DIRECTION',
-            options: [
-                ['влево', 'LEFT'],
-                ['вправо', 'RIGHT'],
-                ['по центру', 'CENTER'],
-            ],
-        }],
+        type: 'oqubot_eye_horizontal',
+        message0: 'глаза влево–вправо на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
         previousStatement: null,
         nextStatement: null,
         colour: '#4C97AF',
-        tooltip: 'Перемещает глаза робота в указанном направлении',
+        tooltip: 'Поворачивает глаза по горизонтали (серво влево/вправо, 0-180)',
+    },
+    {
+        type: 'oqubot_eyelid_top_left',
+        message0: 'верхнее веко (левое) на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#4C97AF',
+        tooltip: 'Управляет левым серво верхнего века (0-180)',
+    },
+    {
+        type: 'oqubot_eyelid_top_right',
+        message0: 'верхнее веко (правое) на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#4C97AF',
+        tooltip: 'Управляет правым серво верхнего века (0-180)',
+    },
+    {
+        type: 'oqubot_eyelid_bottom_left',
+        message0: 'нижнее веко (левое) на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#4C97AF',
+        tooltip: 'Управляет левым серво нижнего века (0-180)',
+    },
+    {
+        type: 'oqubot_eyelid_bottom_right',
+        message0: 'нижнее веко (правое) на %1 градусов',
+        args0: [{ type: 'field_number', name: 'ANGLE', value: 90, min: 0, max: 180, precision: 1 }],
+        previousStatement: null,
+        nextStatement: null,
+        colour: '#4C97AF',
+        tooltip: 'Управляет правым серво нижнего века (0-180)',
     },
     {
         type: 'oqubot_led',
@@ -414,12 +443,17 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Робот',
             colour: '#4C97AF',
+            cssConfig: { icon: 'oqu-ic oqu-ic--robot' },
             contents: [
                 blockSimple('oqubot_open_mouth'),
                 blockSimple('oqubot_close_mouth'),
                 blockSimple('oqubot_move_head'),
-                blockSimple('oqubot_blink'),
-                blockSimple('oqubot_move_eyes'),
+                blockSimple('oqubot_eye_vertical'),
+                blockSimple('oqubot_eye_horizontal'),
+                blockSimple('oqubot_eyelid_top_left'),
+                blockSimple('oqubot_eyelid_top_right'),
+                blockSimple('oqubot_eyelid_bottom_left'),
+                blockSimple('oqubot_eyelid_bottom_right'),
                 blockSimple('oqubot_led'),
             ],
         },
@@ -427,6 +461,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Звук',
             colour: '#9966FF',
+            cssConfig: { icon: 'oqu-ic oqu-ic--sound' },
             contents: [
                 blockSimple('oqubot_play_sound'),
                 blockSimple('oqubot_set_volume'),
@@ -436,6 +471,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Речь',
             colour: '#CF63CF',
+            cssConfig: { icon: 'oqu-ic oqu-ic--speech' },
             contents: [
                 blockWithShadow('oqubot_say', { TEXT: textShadow('Привет, я OquBot!') }),
                 blockWithShadow('oqubot_ask', { TEXT: textShadow('Как тебя зовут?') }),
@@ -452,6 +488,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Управление',
             colour: '#FFAB19',
+            cssConfig: { icon: 'oqu-ic oqu-ic--control' },
             contents: [
                 blockWithShadow('oqubot_wait', { SECONDS: numShadow(1) }),
                 blockWithShadow('oqubot_repeat', { TIMES: numShadow(3) }),
@@ -462,6 +499,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Условия',
             colour: '#FFBF00',
+            cssConfig: { icon: 'oqu-ic oqu-ic--logic' },
             contents: [
                 blockSimple('oqubot_if'),
                 blockSimple('oqubot_if_else'),
@@ -477,6 +515,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Математика',
             colour: '#4C97FF',
+            cssConfig: { icon: 'oqu-ic oqu-ic--math' },
             contents: [
                 blockSimple('oqubot_number'),
                 blockWithShadow('oqubot_math', {
@@ -490,6 +529,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Текст',
             colour: '#FF8C1A',
+            cssConfig: { icon: 'oqu-ic oqu-ic--text' },
             contents: [
                 blockSimple('oqubot_text'),
                 blockWithShadow('oqubot_text_join', {
@@ -503,6 +543,7 @@ const TOOLBOX = {
             kind: 'category',
             name: 'Переменные',
             colour: '#FF6680',
+            cssConfig: { icon: 'oqu-ic oqu-ic--var' },
             contents: [
                 blockWithShadow('oqubot_var_set', { VALUE: numShadow(0) }),
                 blockSimple('oqubot_var_get'),
@@ -544,13 +585,23 @@ function initGenerator() {
     oquPython.forBlock['oqubot_move_head'] = function (block) {
         return 'robot.move_head(' + block.getFieldValue('ANGLE') + ')\n';
     };
-    oquPython.forBlock['oqubot_blink'] = function () {
-        return 'robot.blink()\n';
+    oquPython.forBlock['oqubot_eye_vertical'] = function (block) {
+        return 'robot.eye_vertical(' + block.getFieldValue('ANGLE') + ')\n';
     };
-    oquPython.forBlock['oqubot_move_eyes'] = function (block) {
-        var dir = block.getFieldValue('DIRECTION');
-        var m = { LEFT: '"left"', RIGHT: '"right"', CENTER: '"center"' };
-        return 'robot.move_eyes(' + m[dir] + ')\n';
+    oquPython.forBlock['oqubot_eye_horizontal'] = function (block) {
+        return 'robot.eye_horizontal(' + block.getFieldValue('ANGLE') + ')\n';
+    };
+    oquPython.forBlock['oqubot_eyelid_top_left'] = function (block) {
+        return 'robot.eyelid_top_left(' + block.getFieldValue('ANGLE') + ')\n';
+    };
+    oquPython.forBlock['oqubot_eyelid_top_right'] = function (block) {
+        return 'robot.eyelid_top_right(' + block.getFieldValue('ANGLE') + ')\n';
+    };
+    oquPython.forBlock['oqubot_eyelid_bottom_left'] = function (block) {
+        return 'robot.eyelid_bottom_left(' + block.getFieldValue('ANGLE') + ')\n';
+    };
+    oquPython.forBlock['oqubot_eyelid_bottom_right'] = function (block) {
+        return 'robot.eyelid_bottom_right(' + block.getFieldValue('ANGLE') + ')\n';
     };
     oquPython.forBlock['oqubot_led'] = function (block) {
         var s = block.getFieldValue('STATE');
@@ -690,16 +741,16 @@ function createTheme() {
         base: Blockly.Themes.Classic,
         componentStyles: {
             workspaceBackgroundColour: '#FFFFFF',
-            toolboxBackgroundColour: '#F9F9F9',
-            toolboxForegroundColour: '#575E75',
-            flyoutBackgroundColour: '#F9F9F9',
-            flyoutForegroundColour: '#575E75',
-            flyoutOpacity: 0.95,
-            scrollbarColour: '#CCCCCC',
+            toolboxBackgroundColour: '#F1EADC',
+            toolboxForegroundColour: '#5C574C',
+            flyoutBackgroundColour: '#FFFFFF',
+            flyoutForegroundColour: '#5C574C',
+            flyoutOpacity: 1,
+            scrollbarColour: '#CFC6B3',
             scrollbarOpacity: 0.6,
-            insertionMarkerColour: '#855CD6',
-            insertionMarkerOpacity: 0.4,
-            cursorColour: '#855CD6',
+            insertionMarkerColour: '#F2B705',
+            insertionMarkerOpacity: 0.5,
+            cursorColour: '#F2B705',
         },
         fontStyle: {
             family: 'Nunito, sans-serif',
@@ -736,7 +787,7 @@ var OquIDE = {
             grid: {
                 spacing: 20,
                 length: 2,
-                colour: '#E8E8E8',
+                colour: '#E7DFCF',
                 snap: true,
             },
             zoom: {
@@ -768,6 +819,18 @@ var OquIDE = {
                 self.updateCode();
                 self.updateBlockCount();
             }
+            // 2-way binding for voice chat panel
+            if (event.type === Blockly.Events.BLOCK_CHANGE) {
+                var block = self.workspace.getBlockById(event.blockId);
+                if (block && block.type === 'oqubot_set_personality') {
+                    document.getElementById('voice-persona').value = block.getFieldValue('PERSONA');
+                    localStorage.setItem('oqubot_voice_persona', block.getFieldValue('PERSONA'));
+                }
+                if (block && block.type === 'oqubot_set_mode') {
+                    document.getElementById('voice-mode').value = block.getFieldValue('MODE');
+                    localStorage.setItem('oqubot_voice_mode', block.getFieldValue('MODE'));
+                }
+            }
         });
 
         // Handle window resize
@@ -779,6 +842,9 @@ var OquIDE = {
 
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
+        
+        // Setup floating panel drag
+        this.setupFloatingPanelDrag();
 
         // Load saved settings
         this.loadSettings();
@@ -1029,32 +1095,46 @@ var OquIDE = {
     },
 
     // ── Connect Robot (USB Serial) ──
+    setConnectedUI: function (connected, label) {
+        this.isConnected = connected;
+        var dot = document.getElementById('status-dot');
+        var text = document.getElementById('status-text');
+        var btn = document.getElementById('btn-connect');
+        if (connected) {
+            dot.classList.add('status-dot--connected');
+            text.textContent = label || 'Подключён';
+            if (btn) { btn.classList.add('active'); btn.lastChild.textContent = ' Робот подключён'; }
+        } else {
+            dot.classList.remove('status-dot--connected');
+            text.textContent = 'Не подключён';
+            if (btn) { btn.classList.remove('active'); btn.lastChild.textContent = ' Подключить робота'; }
+        }
+    },
+
     connectRobot: function () {
+        // Если уже подключены — отключаемся
+        if (this.isConnected) {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.disconnect_robot();
+            }
+            this.setConnectedUI(false);
+            this.toast('Робот отключён', 'info');
+            return;
+        }
+
         if (window.pywebview && window.pywebview.api) {
-            this.toast('Searching for robot...', 'info');
+            this.toast('Поиск робота...', 'info');
             window.pywebview.api.connect_robot().then(function (result) {
                 if (result && result.success) {
-                    OquIDE.isConnected = true;
-                    document.getElementById('status-dot').classList.add('status-dot--connected');
-                    document.getElementById('status-text').textContent = result.port || 'Connected';
-                    OquIDE.toast('Robot connected!', 'success');
+                    OquIDE.setConnectedUI(true, result.port || 'Подключён');
+                    OquIDE.toast('Робот подключён!', 'success');
                 } else {
-                    OquIDE.toast('Robot not found', 'error');
+                    OquIDE.toast('Робот не найден', 'error');
                 }
             });
         } else {
-            this.isConnected = !this.isConnected;
-            var dot = document.getElementById('status-dot');
-            var text = document.getElementById('status-text');
-            if (this.isConnected) {
-                dot.classList.add('status-dot--connected');
-                text.textContent = 'COM3 (demo)';
-                this.toast('Robot connected (demo)', 'success');
-            } else {
-                dot.classList.remove('status-dot--connected');
-                text.textContent = 'Not connected';
-                this.toast('Disconnected', 'info');
-            }
+            this.setConnectedUI(true, 'COM3 (демо)');
+            this.toast('Робот подключён (демо)', 'success');
         }
     },
 
@@ -1090,6 +1170,55 @@ var OquIDE = {
 
     closeModal: function (id) {
         document.getElementById(id).classList.remove('active');
+    },
+    
+    toggleVoicePanel: function () {
+        var panel = document.getElementById('voice-floating-panel');
+        if (panel.classList.contains('hidden')) {
+            panel.classList.remove('hidden');
+        } else {
+            panel.classList.add('hidden');
+        }
+    },
+    
+    setupFloatingPanelDrag: function () {
+        var header = document.getElementById('voice-panel-header');
+        var panel = document.getElementById('voice-floating-panel');
+        if (!header || !panel) return;
+        
+        var isDragging = false;
+        var startX, startY, initialX, initialY;
+        
+        header.addEventListener('mousedown', function(e) {
+            if (e.target.tagName.toLowerCase() === 'button') return;
+            isDragging = true;
+            var rect = panel.getBoundingClientRect();
+            // Store current position
+            initialX = rect.left;
+            initialY = rect.top;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // Remove fixed bottom/right so it moves freely
+            panel.style.bottom = 'auto';
+            panel.style.right = 'auto';
+            panel.style.left = initialX + 'px';
+            panel.style.top = initialY + 'px';
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            panel.style.left = (initialX + dx) + 'px';
+            panel.style.top = (initialY + dy) + 'px';
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
     },
 
     setLanguage: function (lang) {
@@ -1218,6 +1347,10 @@ var OquIDE = {
         localStorage.setItem('oqubot_voice_persona', persona);
         localStorage.setItem('oqubot_voice_mode', mode);
         
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.live_update_voice_settings(persona, mode);
+        }
+        
         var blocks = OquIDE.workspace.getAllBlocks(false);
         blocks.forEach(function(b) {
             if (b.type === 'oqubot_set_personality') {
@@ -1239,15 +1372,15 @@ var OquIDE = {
         div.style.lineHeight = '1.4';
         
         if (type === 'user') {
-            div.style.background = '#E8E0F4';
-            div.style.color = '#575E75';
+            div.style.background = 'rgba(242, 183, 5, 0.16)';
+            div.style.color = '#2C2A26';
             div.style.alignSelf = 'flex-end';
             div.innerHTML = '<b>Вы:</b><br>' + text;
         } else {
-            div.style.background = '#F0F0F0';
-            div.style.color = '#575E75';
+            div.style.background = '#F1EADC';
+            div.style.color = '#2C2A26';
             div.style.alignSelf = 'flex-start';
-            div.innerHTML = '<b>🤖 Робот:</b><br>' + text;
+            div.innerHTML = '<b>Робот:</b><br>' + text;
         }
         
         log.appendChild(div);
@@ -1292,6 +1425,7 @@ var OquIDE = {
         var icons = { success: '\u2705', error: '\u274c', info: '\u2139\ufe0f' };
         toast.textContent = (icons[type] || '') + ' ' + message;
         container.appendChild(toast);
+        requestAnimationFrame(function () { toast.classList.add('show'); });
         setTimeout(function () {
             toast.style.animation = 'toast-out 0.3s ease forwards';
             setTimeout(function () { toast.remove(); }, 300);

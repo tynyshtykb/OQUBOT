@@ -15,7 +15,7 @@ class VoiceGenerator:
                 text=text,
                 voice_id=voice_id,
                 model_id="eleven_multilingual_v2",
-                output_format="pcm_16000_16"
+                output_format="pcm_16000"
             )
             
             # Собираем байты

@@ -23,6 +23,9 @@ load_dotenv(dotenv_path=ENV_PATH)
 
 from personalities import PERSONALITIES
 
+class StopExecution(Exception):
+    pass
+
 # ──────────────────────────────────────────────────────────────
 # Virtual Robot Class for Hardware Simulation and Execution
 # ──────────────────────────────────────────────────────────────
@@ -32,6 +35,10 @@ class VirtualRobot:
         self.history = []
         self.personality_key = "default"
         self.mode = "Диалог"
+        
+    def _check_stop(self):
+        if getattr(self.api, '_stop_requested', False):
+            raise StopExecution()
         
     def _send(self, cmd):
         print(f"\033[96m[OquBot Serial]\033[0m -> SEND: {cmd}")
@@ -43,34 +50,63 @@ class VirtualRobot:
 
     # ── Motors & IO ──
     def open_mouth(self, angle):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m Открываю рот на {angle} градусов")
         self._send(f"MOUTH_ANGLE:{angle}")
 
     def close_mouth(self):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m Закрываю рот")
         self._send("MOUTH_ANGLE:0")
 
     def move_head(self, angle):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m Поворачиваю голову на {angle} градусов")
         self._send(f"HEAD_ANGLE:{angle}")
 
-    def blink(self):
-        print(f"\033[93m[OquBot Simulation]\033[0m Моргнул")
-        self._send("EYES:BLINK")
+    # ── Eye system (6 servos, PCA9685 channels 0-5) ──
+    def eye_vertical(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Глаза вверх/вниз: {angle}°")
+        self._send(f"EYE_UD:{angle}")
 
-    def move_eyes(self, direction):
-        print(f"\033[93m[OquBot Simulation]\033[0m Глаза в направлении: {direction}")
-        self._send(f"EYES_DIR:{direction.upper()}")
+    def eye_horizontal(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Глаза влево/вправо: {angle}°")
+        self._send(f"EYE_LR:{angle}")
+
+    def eyelid_top_left(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Верхнее веко (левое): {angle}°")
+        self._send(f"EYELID_UL:{angle}")
+
+    def eyelid_top_right(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Верхнее веко (правое): {angle}°")
+        self._send(f"EYELID_UR:{angle}")
+
+    def eyelid_bottom_left(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Нижнее веко (левое): {angle}°")
+        self._send(f"EYELID_LL:{angle}")
+
+    def eyelid_bottom_right(self, angle):
+        self._check_stop()
+        print(f"\033[93m[OquBot Simulation]\033[0m Нижнее веко (правое): {angle}°")
+        self._send(f"EYELID_LR:{angle}")
 
     def led(self, state):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m LED {'ВКЛ' if state else 'ВЫКЛ'}")
         self._send(f"LED:{1 if state else 0}")
 
     def play_sound(self, sound_name):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m Проигрываю звук: {sound_name}")
         self._send(f"PLAY_SOUND:{sound_name}")
 
     def set_volume(self, vol):
+        self._check_stop()
         print(f"\033[93m[OquBot Simulation]\033[0m Громкость: {vol}")
         self._send(f"VOLUME:{vol}")
 
@@ -112,6 +148,12 @@ class VirtualRobot:
         if not text:
             return ""
         
+        # Override with live settings from API if they exist!
+        if getattr(self.api, 'live_persona', None):
+            self.personality_key = self.api.live_persona
+        if getattr(self.api, 'live_mode', None):
+            self.mode = self.api.live_mode
+        
         persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
         prompt = persona["prompts"].get("ru", "Ты робот OquBot.") + f" Режим общения: {self.mode}."
         
@@ -142,8 +184,14 @@ class VirtualRobot:
         return answer
 
     def say(self, text):
+        self._check_stop()
         if not text:
             return
+            
+        # Override with live settings from API if they exist!
+        if getattr(self.api, 'live_persona', None):
+            self.personality_key = self.api.live_persona
+            
         persona = PERSONALITIES.get(self.personality_key, PERSONALITIES["default"])
         voice_id = persona.get("voice_id", "JBFqnCBsd6RMkjVDRZzb")
         
@@ -167,7 +215,10 @@ class VirtualRobot:
 
     def wait(self, seconds):
         print(f"\033[93m[OquBot Simulation]\033[0m Жду {seconds} секунд...")
-        time.sleep(seconds)
+        end_time = time.time() + float(seconds)
+        while time.time() < end_time:
+            self._check_stop()
+            time.sleep(0.1)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -182,6 +233,9 @@ class OquBotBlockAPI:
         self._serial_port = None
         self.voice_turn_completed = threading.Event()
         self.voice_turn_result = ""
+        
+        self.live_persona = None
+        self.live_mode = None
         
         # Загружаем ключи из .env
         self._groq_key = os.getenv("GROQ_API_KEY")
@@ -241,8 +295,13 @@ class OquBotBlockAPI:
         return results
 
     def get_personalities(self):
-        """Return personality options to frontend"""
+        """Return dict of available personalities"""
         return {k: v["name"] for k, v in PERSONALITIES.items()}
+
+    def live_update_voice_settings(self, persona, mode):
+        self.live_persona = persona
+        self.live_mode = mode
+        print(f"[OquBot IDE] Live settings updated: Persona={persona}, Mode={mode}")
 
     # ── Voice UI Push To Talk ──
     def start_voice_recording(self):
@@ -336,6 +395,7 @@ class OquBotBlockAPI:
         if self._running:
             return "Already running"
 
+        self._stop_requested = False
         self._running = True
         print("\n" + "=" * 50)
         print("[OquBot IDE] Запуск программы из блоков...")
@@ -343,20 +403,29 @@ class OquBotBlockAPI:
         print(code)
         print("=" * 50)
 
-        # TODO: Parse and send serial commands
-        # Example future implementation:
-        # for line in code.split('\n'):
-        #     cmd = self._parse_to_serial(line)
-        #     if cmd and self._serial:
-        #         self._serial.write((cmd + '\n').encode('utf-8'))
-        #         response = self._serial.readline().decode('utf-8').strip()
-        #         if response.startswith('ERR'):
-        #             return "Error: " + response
+        def daemon_thread():
+            import random
+            ns = {'robot': VirtualRobot(self), 'time': time, 'random': random, '__name__': '__oqubot__'}
+            try:
+                exec(code, ns)
+            except StopExecution:
+                pass
+            except Exception as e:
+                print(f"[OquBot IDE] Ошибка выполнения: {e}")
+                safe_err = str(e).replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
+                self.evaluate_js(f"if (typeof M !== 'undefined') {{ M.toast({{html: 'Ошибка выполнения кода: {safe_err}', classes: 'red'}}); }}")
+            finally:
+                self._running = False
+                self.evaluate_js("OquIDE.stopProgram()")
 
-        self._running = False
-        return "Program done (demo)"
+        t = threading.Thread(target=daemon_thread, daemon=True)
+        t.start()
+
+        return "Programm started"
+
     def stop_code(self):
         """Stop current program execution"""
+        self._stop_requested = True
         self._running = False
         print("[OquBot IDE] [STOP] Program stopped")
         return True
